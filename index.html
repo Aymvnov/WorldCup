@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>فعالية توقعات كأس العالم 2026 🏆</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<style>
+  body{margin:0;font-family:'Cairo','Segoe UI',sans-serif}
+  ::-webkit-scrollbar{height:6px;width:6px}
+  ::-webkit-scrollbar-thumb{background:rgba(243,239,228,0.14);border-radius:3px}
+  input::placeholder{color:rgba(243,239,228,0.35)}
+</style>
+<script>
+/* ============================================================
+   ⚙️ إعدادات قاعدة البيانات (تعبيها مرة واحدة فقط)
+   1) ادخل https://console.firebase.google.com وسجل بحساب قوقل
+   2) Add project → أي اسم → أكمل (عطل Analytics إذا تبي)
+   3) من القائمة: Build → Realtime Database → Create Database
+      → اختر "Start in test mode" → Enable
+   4) من تبويب Rules اجعلها:  { "rules": { ".read": true, ".write": true } }
+   5) ارجع لصفحة المشروع → أيقونة </> (Web) → سجل التطبيق
+      → انسخ القيم من firebaseConfig والصقها تحت 👇
+   ============================================================ */
+const FIREBASE_CONFIG = {
+  apiKey: "ضع_القيمة_هنا",
+  authDomain: "ضع_القيمة_هنا",
+  databaseURL: "ضع_القيمة_هنا",
+  projectId: "ضع_القيمة_هنا",
+  storageBucket: "ضع_القيمة_هنا",
+  messagingSenderId: "ضع_القيمة_هنا",
+  appId: "ضع_القيمة_هنا"
+};
+</script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo } = React;
+
+/* ====== ألوان ====== */
+const GOLD="#E8C35A", PITCH="#0D3B2E", PITCH_D="#092A20", CARD="#114435",
+      LINE="rgba(243,239,228,0.14)", CHALK="#F3EFE4", MUTE="rgba(243,239,228,0.62)", RED="#E26D5C";
+
+/* ====== أعلام ====== */
+const FLAGS={"المكسيك":"🇲🇽","جنوب أفريقيا":"🇿🇦","كوريا الجنوبية":"🇰🇷","التشيك":"🇨🇿","كندا":"🇨🇦","البوسنة والهرسك":"🇧🇦","الولايات المتحدة":"🇺🇸","باراغواي":"🇵🇾","قطر":"🇶🇦","سويسرا":"🇨🇭","البرازيل":"🇧🇷","المغرب":"🇲🇦","هايتي":"🇭🇹","أسكتلندا":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","أستراليا":"🇦🇺","تركيا":"🇹🇷","ألمانيا":"🇩🇪","كوراساو":"🇨🇼","هولندا":"🇳🇱","اليابان":"🇯🇵","ساحل العاج":"🇨🇮","الإكوادور":"🇪🇨","السويد":"🇸🇪","تونس":"🇹🇳","إسبانيا":"🇪🇸","الرأس الأخضر":"🇨🇻","بلجيكا":"🇧🇪","مصر":"🇪🇬","السعودية":"🇸🇦","أوروغواي":"🇺🇾","إيران":"🇮🇷","نيوزيلندا":"🇳🇿","فرنسا":"🇫🇷","السنغال":"🇸🇳","العراق":"🇮🇶","النرويج":"🇳🇴","الأرجنتين":"🇦🇷","الجزائر":"🇩🇿","النمسا":"🇦🇹","الأردن":"🇯🇴","البرتغال":"🇵🇹","الكونغو الديمقراطية":"🇨🇩","إنجلترا":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","كرواتيا":"🇭🇷","غانا":"🇬🇭","بنما":"🇵🇦","أوزبكستان":"🇺🇿","كولومبيا":"🇨🇴"};
+const flag=(t)=>FLAGS[t]||"⚽";
+
+/* ====== جدول المباريات (توقيت السعودية GMT+3) ====== */
+const GROUP=[
+[1,"2026-06-11T22:00","A","المكسيك","جنوب أفريقيا"],[2,"2026-06-12T05:00","A","كوريا الجنوبية","التشيك"],
+[3,"2026-06-12T22:00","B","كندا","البوسنة والهرسك"],[4,"2026-06-13T04:00","D","الولايات المتحدة","باراغواي"],
+[5,"2026-06-13T22:00","B","قطر","سويسرا"],[6,"2026-06-14T01:00","C","البرازيل","المغرب"],
+[7,"2026-06-14T04:00","C","هايتي","أسكتلندا"],[8,"2026-06-14T07:00","D","أستراليا","تركيا"],
+[9,"2026-06-14T20:00","E","ألمانيا","كوراساو"],[10,"2026-06-14T23:00","F","هولندا","اليابان"],
+[11,"2026-06-15T02:00","E","ساحل العاج","الإكوادور"],[12,"2026-06-15T05:00","F","السويد","تونس"],
+[13,"2026-06-15T07:00","H","إسبانيا","الرأس الأخضر"],[14,"2026-06-15T22:00","G","بلجيكا","مصر"],
+[15,"2026-06-16T01:00","H","السعودية","أوروغواي"],[16,"2026-06-16T04:00","G","إيران","نيوزيلندا"],
+[17,"2026-06-16T22:00","I","فرنسا","السنغال"],[18,"2026-06-17T01:00","I","العراق","النرويج"],
+[19,"2026-06-17T04:00","J","الأرجنتين","الجزائر"],[20,"2026-06-17T07:00","J","النمسا","الأردن"],
+[21,"2026-06-17T20:00","K","البرتغال","الكونغو الديمقراطية"],[22,"2026-06-17T23:00","L","إنجلترا","كرواتيا"],
+[23,"2026-06-18T02:00","L","غانا","بنما"],[24,"2026-06-18T05:00","K","أوزبكستان","كولومبيا"],
+[25,"2026-06-18T19:00","A","التشيك","جنوب أفريقيا"],[26,"2026-06-18T22:00","B","سويسرا","البوسنة والهرسك"],
+[27,"2026-06-19T01:00","B","كندا","قطر"],[28,"2026-06-19T04:00","A","المكسيك","كوريا الجنوبية"],
+[29,"2026-06-19T22:00","D","الولايات المتحدة","أستراليا"],[30,"2026-06-20T01:00","C","أسكتلندا","المغرب"],
+[31,"2026-06-20T03:30","C","البرازيل","هايتي"],[32,"2026-06-20T06:00","D","تركيا","باراغواي"],
+[33,"2026-06-20T20:00","F","هولندا","السويد"],[34,"2026-06-20T23:00","E","ألمانيا","ساحل العاج"],
+[35,"2026-06-21T03:00","E","الإكوادور","كوراساو"],[36,"2026-06-21T07:00","F","تونس","اليابان"],
+[37,"2026-06-21T19:00","H","إسبانيا","السعودية"],[38,"2026-06-21T22:00","G","بلجيكا","إيران"],
+[39,"2026-06-22T01:00","H","أوروغواي","الرأس الأخضر"],[40,"2026-06-22T04:00","G","نيوزيلندا","مصر"],
+[41,"2026-06-22T20:00","J","الأرجنتين","النمسا"],[42,"2026-06-23T00:00","I","فرنسا","العراق"],
+[43,"2026-06-23T03:00","I","النرويج","السنغال"],[44,"2026-06-23T06:00","J","الأردن","الجزائر"],
+[45,"2026-06-23T20:00","K","البرتغال","أوزبكستان"],[46,"2026-06-23T23:00","L","إنجلترا","غانا"],
+[47,"2026-06-24T02:00","L","بنما","كرواتيا"],[48,"2026-06-24T05:00","K","كولومبيا","الكونغو الديمقراطية"],
+[49,"2026-06-24T22:00","B","سويسرا","كندا"],[50,"2026-06-24T22:00","B","البوسنة والهرسك","قطر"],
+[51,"2026-06-25T01:00","C","أسكتلندا","البرازيل"],[52,"2026-06-25T01:00","C","المغرب","هايتي"],
+[53,"2026-06-25T04:00","A","التشيك","المكسيك"],[54,"2026-06-25T04:00","A","جنوب أفريقيا","كوريا الجنوبية"],
+[55,"2026-06-25T23:00","E","الإكوادور","ألمانيا"],[56,"2026-06-25T23:00","E","كوراساو","ساحل العاج"],
+[57,"2026-06-26T02:00","F","تونس","هولندا"],[58,"2026-06-26T02:00","F","اليابان","السويد"],
+[59,"2026-06-26T05:00","D","تركيا","الولايات المتحدة"],[60,"2026-06-26T05:00","D","باراغواي","أستراليا"],
+[61,"2026-06-26T22:00","I","النرويج","فرنسا"],[62,"2026-06-26T22:00","I","السنغال","العراق"],
+[63,"2026-06-27T03:00","H","أوروغواي","إسبانيا"],[64,"2026-06-27T03:00","H","الرأس الأخضر","السعودية"],
+[65,"2026-06-27T06:00","G","نيوزيلندا","بلجيكا"],[66,"2026-06-27T06:00","G","مصر","إيران"],
+[67,"2026-06-28T00:00","L","بنما","إنجلترا"],[68,"2026-06-28T00:00","L","كرواتيا","غانا"],
+[69,"2026-06-28T02:30","K","كولومبيا","البرتغال"],[70,"2026-06-28T02:30","K","الكونغو الديمقراطية","أوزبكستان"],
+[71,"2026-06-28T05:00","J","الأردن","الأرجنتين"],[72,"2026-06-28T05:00","J","الجزائر","النمسا"],
+];
+const KO=[
+[73,"2026-06-28T22:00","دور الـ32","ثاني المجموعة A","ثاني المجموعة B"],
+[74,"2026-06-29T20:00","دور الـ32","أول المجموعة C","ثاني المجموعة F"],
+[75,"2026-06-29T23:30","دور الـ32","أول المجموعة E","أفضل ثالث"],
+[76,"2026-06-30T04:00","دور الـ32","أول المجموعة F","ثاني المجموعة C"],
+[77,"2026-06-30T20:00","دور الـ32","ثاني المجموعة E","ثاني المجموعة I"],
+[78,"2026-07-01T00:00","دور الـ32","أول المجموعة I","أفضل ثالث"],
+[79,"2026-07-01T04:00","دور الـ32","أول المجموعة A","أفضل ثالث"],
+[80,"2026-07-01T19:00","دور الـ32","أول المجموعة L","أفضل ثالث"],
+[81,"2026-07-01T23:00","دور الـ32","أول المجموعة G","أفضل ثالث"],
+[82,"2026-07-02T03:00","دور الـ32","أول المجموعة D","أفضل ثالث"],
+[83,"2026-07-02T22:00","دور الـ32","أول المجموعة H","ثاني المجموعة J"],
+[84,"2026-07-03T02:00","دور الـ32","ثاني المجموعة K","ثاني المجموعة L"],
+[85,"2026-07-03T06:00","دور الـ32","أول المجموعة B","أفضل ثالث"],
+[86,"2026-07-03T21:00","دور الـ32","ثاني المجموعة D","ثاني المجموعة G"],
+[87,"2026-07-04T01:00","دور الـ32","أول المجموعة J","ثاني المجموعة H"],
+[88,"2026-07-04T04:30","دور الـ32","أول المجموعة K","أفضل ثالث"],
+[89,"2026-07-04T20:00","ثمن النهائي","الفائز من 73","الفائز من 75"],
+[90,"2026-07-05T00:00","ثمن النهائي","الفائز من 74","الفائز من 77"],
+[91,"2026-07-05T23:00","ثمن النهائي","الفائز من 76","الفائز من 78"],
+[92,"2026-07-06T03:00","ثمن النهائي","الفائز من 79","الفائز من 80"],
+[93,"2026-07-06T22:00","ثمن النهائي","الفائز من 83","الفائز من 84"],
+[94,"2026-07-07T03:00","ثمن النهائي","الفائز من 81","الفائز من 82"],
+[95,"2026-07-07T07:00","ثمن النهائي","الفائز من 86","الفائز من 88"],
+[96,"2026-07-07T23:00","ثمن النهائي","الفائز من 85","الفائز من 87"],
+[97,"2026-07-09T23:00","ربع النهائي","الفائز من 89","الفائز من 90"],
+[98,"2026-07-10T22:00","ربع النهائي","الفائز من 93","الفائز من 94"],
+[99,"2026-07-12T00:00","ربع النهائي","الفائز من 91","الفائز من 92"],
+[100,"2026-07-12T04:00","ربع النهائي","الفائز من 95","الفائز من 96"],
+[101,"2026-07-14T22:00","نصف النهائي","الفائز من 97","الفائز من 98"],
+[102,"2026-07-15T22:00","نصف النهائي","الفائز من 99","الفائز من 100"],
+[103,"2026-07-19T00:00","المركز الثالث","خاسر نصف النهائي 1","خاسر نصف النهائي 2"],
+[104,"2026-07-19T22:00","النهائي","الفائز من نصف النهائي 1","الفائز من نصف النهائي 2"],
+];
+const ALL=[...GROUP,...KO];
+
+/* ====== أدوات ====== */
+const mid=(m)=>"m"+m[0];
+const kickoff=(m)=>new Date(m[1]+":00+03:00");
+const DAYS_AR=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+const MONTHS_AR=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+const dayKey=(m)=>m[1].slice(0,10);
+const fmtDay=(k)=>{const d=new Date(k+"T12:00:00Z");return `${DAYS_AR[d.getUTCDay()]} ${parseInt(k.slice(8,10))} ${MONTHS_AR[parseInt(k.slice(5,7))-1]}`;};
+const fmtTime=(m)=>{const[h,mi]=m[1].slice(11).split(":");const hh=parseInt(h);const ap=hh<12?"ص":"م";const h12=hh%12===0?12:hh%12;return `${h12}:${mi} ${ap}`;};
+const outcome=(s)=>{const[a,b]=s.split("-").map(Number);return a>b?1:a<b?-1:0;};
+const calcPts=(pred,res)=>{if(!pred||!res)return null;if(pred===res)return 3;return outcome(pred)===outcome(res)?1:0;};
+const safeName=(n)=>n.replace(/[.#$\[\]\/]/g,"_");
+
+/* ====== قاعدة البيانات ====== */
+function readCfg(){
+  if(FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes("ضع")) return FIREBASE_CONFIG;
+  try{
+    const m=location.hash.match(/cfg=([^&]+)/);
+    if(m){
+      const cfg=JSON.parse(atob(decodeURIComponent(m[1])));
+      if(cfg&&cfg.apiKey){ try{localStorage.setItem("wc26cfg",JSON.stringify(cfg));}catch(e){} return cfg; }
+    }
+  }catch(e){}
+  try{ const s=localStorage.getItem("wc26cfg"); if(s) return JSON.parse(s); }catch(e){}
+  return null;
+}
+const FB_CFG=readCfg();
+let db=null;
+if(FB_CFG){ try{ firebase.initializeApp(FB_CFG); db=firebase.database(); }catch(e){} }
+const configured=!!db;
+const shareLink=()=> FB_CFG ? location.origin+location.pathname+"#cfg="+encodeURIComponent(btoa(JSON.stringify(FB_CFG))) : "";
+const P="wc26";
+const dbGet=async(path)=>{ try{ const s=await db.ref(P+"/"+path).get(); return s.val(); }catch(e){ return null; } };
+const dbSet=async(path,v)=>{ try{ await db.ref(P+"/"+path).set(v); return true; }catch(e){ return false; } };
+
+/* ====== عناصر مشتركة ====== */
+const Btn=({children,onClick,gold,full,small,danger,disabled})=>(
+  <button onClick={onClick} disabled={disabled} style={{
+    background:gold?GOLD:danger?"transparent":"rgba(243,239,228,0.08)",
+    color:gold?PITCH_D:danger?RED:CHALK,
+    border:danger?`1px solid ${RED}`:`1px solid ${gold?GOLD:LINE}`,
+    borderRadius:12,fontWeight:700,fontFamily:"inherit",
+    padding:small?"6px 12px":"12px 18px",fontSize:small?13:15,
+    width:full?"100%":"auto",opacity:disabled?0.45:1,cursor:disabled?"default":"pointer"}}>{children}</button>
+);
+const Input=({center,style,...p})=>(
+  <input {...p} style={{background:"rgba(0,0,0,0.25)",border:`1px solid ${LINE}`,color:CHALK,
+    borderRadius:12,padding:"12px 14px",fontSize:15,width:"100%",boxSizing:"border-box",
+    fontFamily:"inherit",outline:"none",textAlign:center?"center":"right",...style}}/>
+);
+const ScoreBox=({value,onChange,disabled})=>(
+  <input inputMode="numeric" pattern="[0-9]*" maxLength={2} value={value} disabled={disabled}
+    onChange={(e)=>onChange(e.target.value.replace(/[^0-9]/g,""))}
+    placeholder="-" style={{width:44,height:44,textAlign:"center",fontSize:18,fontWeight:800,
+      background:disabled?"rgba(0,0,0,0.15)":"rgba(0,0,0,0.3)",
+      border:`1.5px solid ${value!==""?GOLD:LINE}`,color:value!==""?GOLD:CHALK,
+      borderRadius:10,fontFamily:"inherit",outline:"none",opacity:disabled?0.5:1,boxSizing:"border-box"}}/>
+);
+
+/* ====== التطبيق ====== */
+function App(){
+  const [phase,setPhase]=useState("loading");
+  const [config,setConfig]=useState(null);
+  const [users,setUsers]=useState([]);
+  const [me,setMe]=useState(null);
+  const [tab,setTab]=useState("matches");
+  const [results,setResults]=useState({});
+  const [koTeams,setKoTeams]=useState({});
+  const [myPreds,setMyPreds]=useState({});
+  const [dirty,setDirty]=useState(false);
+  const [allPreds,setAllPreds]=useState({});
+  const [scorers,setScorers]=useState([]);
+  const [isAdmin,setIsAdmin]=useState(false);
+  const [toast,setToast]=useState("");
+  const [now,setNow]=useState(new Date());
+
+  useEffect(()=>{const t=setInterval(()=>setNow(new Date()),30000);return()=>clearInterval(t);},[]);
+  const flash=(m)=>{setToast(m);setTimeout(()=>setToast(""),2500);};
+
+  /* تحميل + استماع حي */
+  useEffect(()=>{
+    if(!configured||!db){ setPhase("noconfig"); return; }
+    let first=true;
+    db.ref(P+"/config").on("value",(s)=>{
+      const cfg=s.val(); setConfig(cfg);
+      if(first){ setPhase(cfg?"login":"setup"); first=false; }
+      else if(!cfg) setPhase("setup");
+    },()=>setPhase("dberror"));
+    db.ref(P+"/users").on("value",(s)=>{const v=s.val()||{};setUsers(Object.values(v));});
+    db.ref(P+"/results").on("value",(s)=>setResults(s.val()||{}));
+    db.ref(P+"/teams").on("value",(s)=>setKoTeams(s.val()||{}));
+    db.ref(P+"/scorers").on("value",(s)=>setScorers(s.val()||[]));
+    db.ref(P+"/preds").on("value",(s)=>setAllPreds(s.val()||{}));
+    return ()=>db.ref(P).off();
+  },[]);
+
+  const teamName=(m,side)=>{const o=koTeams[mid(m)];return o&&o[side]?o[side]:m[side==="h"?3:4];};
+  const isLocked=(m)=>now>=kickoff(m);
+
+  /* إعداد الفعالية */
+  const [setupName,setSetupName]=useState("فعالية كأس العالم 2026");
+  const [setupPin,setSetupPin]=useState("");
+  const doSetup=async()=>{
+    if(setupPin.length<4)return flash("اختر رمز إدارة من 4 أرقام على الأقل");
+    const cfg={eventName:setupName.trim()||"فعالية كأس العالم 2026",adminPin:setupPin,topAnswer:""};
+    const ok=await dbSet("config",cfg);
+    if(ok){setConfig(cfg);setPhase("login");flash("تم إنشاء الفعالية 🎉");}
+    else flash("تعذر الاتصال بقاعدة البيانات");
+  };
+
+  /* تسجيل / دخول */
+  const [loginName,setLoginName]=useState("");
+  const [loginPin,setLoginPin]=useState("");
+  const [scorerPick,setScorerPick]=useState("");
+  const [mode,setMode]=useState("register");
+  const enter=async()=>{
+    const name=loginName.trim();
+    if(!name||loginPin.length<4)return flash("اكتب اسمك ورمزًا سريًا من 4 أرقام");
+    const key=safeName(name);
+    const found=await dbGet("users/"+key);
+    if(mode==="register"){
+      if(found)return flash("الاسم مسجل من قبل — ادخل من «تسجيل الدخول»");
+      const u={name,pin:loginPin,scorer:scorerPick.trim(),joined:Date.now()};
+      const ok=await dbSet("users/"+key,u);
+      if(!ok)return flash("تعذر التسجيل، حاول مرة أخرى");
+      setMe(u);
+    }else{
+      if(!found)return flash("الاسم غير موجود — سجل أولًا");
+      if(found.pin!==loginPin)return flash("الرمز السري غير صحيح");
+      setMe(found);
+    }
+    const preds=(await dbGet("preds/"+key))||{};
+    setMyPreds(preds);
+    try{localStorage.setItem("wc26me",JSON.stringify({name,pin:loginPin}));}catch(e){}
+    setPhase("main");setTab("matches");
+  };
+  /* دخول تلقائي إذا سبق التسجيل من نفس الجوال */
+  useEffect(()=>{
+    if(phase!=="login")return;
+    try{
+      const saved=JSON.parse(localStorage.getItem("wc26me")||"null");
+      if(saved&&saved.name){setLoginName(saved.name);setLoginPin(saved.pin||"");setMode("login");}
+    }catch(e){}
+  },[phase]);
+
+  /* حفظ التوقعات */
+  const setPred=(id,side,val)=>{
+    setMyPreds((p)=>{
+      const k="m"+id;
+      const cur=p[k]?p[k].split("-"):["",""];
+      if(side==="h")cur[0]=val;else cur[1]=val;
+      const v=`${cur[0]}-${cur[1]}`;
+      const np={...p};
+      if(v==="-")delete np[k];else np[k]=v;
+      return np;
+    });
+    setDirty(true);
+  };
+  const savePreds=async()=>{
+    const key=safeName(me.name);
+    const clean={};
+    for(const[k,v]of Object.entries(myPreds)){
+      if(v&&/^\d+-\d+$/.test(v))clean[k]=v;
+    }
+    const old=(await dbGet("preds/"+key))||{};
+    for(const m of ALL)if(isLocked(m)){
+      if(old[mid(m)])clean[mid(m)]=old[mid(m)];
+      else delete clean[mid(m)];
+    }
+    const ok=await dbSet("preds/"+key,clean);
+    if(ok){setMyPreds(clean);setDirty(false);flash("تم حفظ توقعاتك ✅");}
+    else flash("تعذر الحفظ، حاول مرة أخرى");
+  };
+
+  /* الترتيب (حي مباشرة) */
+  const board=useMemo(()=>{
+    return users.map((u)=>{
+      let pts=0,exact=0,hit=0;
+      const preds=allPreds[safeName(u.name)]||{};
+      for(const[id,res]of Object.entries(results)){
+        const p=calcPts(preds[id],res);
+        if(p===3){pts+=3;exact++;}else if(p===1){pts+=1;hit++;}
+      }
+      let bonus=0;
+      if(config&&config.topAnswer&&u.scorer&&u.scorer.trim()===config.topAnswer.trim())bonus=10;
+      return{name:u.name,pts:pts+bonus,exact,hit,bonus,scorer:u.scorer};
+    }).sort((a,b)=>b.pts-a.pts||b.exact-a.exact);
+  },[users,allPreds,results,config]);
+
+  /* الإدارة */
+  const [adminPinTry,setAdminPinTry]=useState("");
+  const [resDraft,setResDraft]=useState({});
+  const [koDraft,setKoDraft]=useState({});
+  const [scDraft,setScDraft]=useState({n:"",t:"",g:""});
+  const [topDraft,setTopDraft]=useState("");
+
+  const saveResult=async(id)=>{
+    const d=resDraft[id];
+    if(!d||!/^\d+$/.test(d.h||"")||!/^\d+$/.test(d.a||""))return flash("أدخل نتيجة صحيحة");
+    const ok=await dbSet("results/m"+id,`${d.h}-${d.a}`);
+    if(ok)flash(`تم رصد نتيجة المباراة ${id} ✅`);
+  };
+  const clearResult=async(id)=>{await db.ref(P+"/results/m"+id).remove();flash("تم حذف النتيجة");};
+  const saveKoTeam=async(id)=>{
+    const d=koDraft[id];if(!d)return;
+    const cur=koTeams["m"+id]||{};
+    const ok=await dbSet("teams/m"+id,{h:d.h!==undefined?d.h:(cur.h||""),a:d.a!==undefined?d.a:(cur.a||"")});
+    if(ok)flash("تم تحديث الفرق ✅");
+  };
+  const addScorer=async()=>{
+    if(!scDraft.n.trim())return;
+    const sc=[...scorers.filter((s)=>s.n!==scDraft.n.trim()),{n:scDraft.n.trim(),t:scDraft.t.trim(),g:Number(scDraft.g)||0}];
+    sc.sort((a,b)=>b.g-a.g);
+    const ok=await dbSet("scorers",sc);
+    if(ok){setScDraft({n:"",t:"",g:""});flash("تم تحديث الهدافين ✅");}
+  };
+  const delScorer=async(n)=>{await dbSet("scorers",scorers.filter((s)=>s.n!==n));};
+  const saveTopAnswer=async()=>{
+    const cfg={...config,topAnswer:topDraft.trim()};
+    const ok=await dbSet("config",cfg);
+    if(ok)flash("تم اعتماد الهداف الرسمي 🏆");
+  };
+
+  /* أيام البطولة */
+  const days=useMemo(()=>[...new Set(ALL.map(dayKey))],[]);
+  const todayKey=(()=>{const d=new Date(now.getTime()+3*3600*1000);return d.toISOString().slice(0,10);})();
+  const [selDay,setSelDay]=useState(days.includes(todayKey)?todayKey:days[0]);
+  const dayMatches=useMemo(()=>ALL.filter((m)=>dayKey(m)===selDay),[selDay]);
+
+  /* ====== الإطار ====== */
+  const shell=(children)=>(
+    <div dir="rtl" style={{minHeight:"100vh",background:`radial-gradient(1200px 600px at 50% -100px, #145341 0%, ${PITCH} 45%, ${PITCH_D} 100%)`,color:CHALK,fontFamily:"'Cairo','Segoe UI',sans-serif"}}>
+      {children}
+      {toast&&<div style={{position:"fixed",bottom:84,left:"50%",transform:"translateX(-50%)",background:GOLD,color:PITCH_D,padding:"10px 20px",borderRadius:999,fontWeight:800,fontSize:14,zIndex:100,boxShadow:"0 6px 20px rgba(0,0,0,0.4)",whiteSpace:"nowrap"}}>{toast}</div>}
+    </div>
+  );
+  const crest=(
+    <div style={{textAlign:"center",paddingTop:36,paddingBottom:8}}>
+      <div style={{fontSize:44}}>🏆</div>
+      <div style={{fontWeight:900,fontSize:26,color:GOLD,letterSpacing:0.5}}>{(config&&config.eventName)||"فعالية كأس العالم 2026"}</div>
+      <div style={{color:MUTE,fontSize:13,marginTop:4}}>104 مباريات · توقيت السعودية 🇸🇦 · توقّع واكسب النقاط</div>
+    </div>
+  );
+
+  if(phase==="loading")return shell(<div style={{textAlign:"center",paddingTop:120,fontSize:18}}>⚽ جارٍ التحميل...</div>);
+
+  /* تهيئة الإعدادات من المتصفح مباشرة */
+  const [cfgText,setCfgText]=useState("");
+  const [dbUrlText,setDbUrlText]=useState("");
+  const applyCfg=()=>{
+    const pick=(k)=>{const m=cfgText.match(new RegExp(k+"\\s*[:=]\\s*[\"']([^\"']+)[\"']"));return m?m[1]:"";};
+    const cfg={apiKey:pick("apiKey"),authDomain:pick("authDomain"),databaseURL:pick("databaseURL"),
+               projectId:pick("projectId"),storageBucket:pick("storageBucket"),
+               messagingSenderId:pick("messagingSenderId"),appId:pick("appId")};
+    if(dbUrlText.trim())cfg.databaseURL=dbUrlText.trim();
+    if(!cfg.databaseURL&&cfg.projectId)cfg.databaseURL=`https://${cfg.projectId}-default-rtdb.firebaseio.com`;
+    if(!cfg.apiKey||!cfg.databaseURL){flash("الإعدادات ناقصة — تأكد من لصق الكود كاملًا");return;}
+    try{localStorage.setItem("wc26cfg",JSON.stringify(cfg));}catch(e){}
+    location.hash="cfg="+encodeURIComponent(btoa(JSON.stringify(cfg)));
+    location.reload();
+  };
+
+  if(phase==="noconfig"||phase==="dberror")return shell(
+    <>
+      {crest}
+      <div style={{maxWidth:460,margin:"24px auto",padding:"0 20px",display:"grid",gap:12}}>
+        <div style={{background:CARD,border:`1px solid ${LINE}`,borderRadius:18,padding:20,lineHeight:2,fontSize:14,display:"grid",gap:10}}>
+          <div style={{fontWeight:900,fontSize:17}}>⚙️ تهيئة الموقع (للمنظم — مرة واحدة)</div>
+          {phase==="dberror"&&<div style={{color:RED,fontSize:13}}>تعذر الاتصال بقاعدة البيانات. تأكد من قواعد Realtime Database: <span dir="ltr" style={{color:GOLD}}>".read": true, ".write": true</span> ثم أعد لصق الإعدادات.</div>}
+          <div style={{fontSize:13,color:MUTE}}>الصق هنا كود <b style={{color:CHALK}}>firebaseConfig</b> كما نسخته من موقع Firebase (انسخه كاملًا ولا يهم شكله):</div>
+          <textarea value={cfgText} onChange={(e)=>setCfgText(e.target.value)} rows={6} dir="ltr"
+            placeholder={'const firebaseConfig = {\n  apiKey: "...",\n  authDomain: "...",\n  ...\n};'}
+            style={{background:"rgba(0,0,0,0.25)",border:`1px solid ${LINE}`,color:CHALK,borderRadius:12,padding:"12px 14px",fontSize:12,width:"100%",boxSizing:"border-box",fontFamily:"monospace",outline:"none"}}/>
+          <div style={{fontSize:12,color:MUTE}}>اختياري: رابط قاعدة البيانات (يظهر أعلى صفحة Realtime Database، ينتهي بـ firebaseio.com) — الصقه فقط إذا لم يكن موجودًا في الكود أعلاه:</div>
+          <Input value={dbUrlText} onChange={(e)=>setDbUrlText(e.target.value)} placeholder="https://xxxx-default-rtdb.firebaseio.com" dir="ltr" style={{textAlign:"left",fontSize:12}}/>
+          <Btn gold full onClick={applyCfg}>تفعيل الموقع ✅</Btn>
+          <div style={{fontSize:12,color:MUTE,borderTop:`1px dashed ${LINE}`,paddingTop:10}}>
+            ما عندك إعدادات؟ ادخل <span dir="ltr" style={{color:GOLD}}>console.firebase.google.com</span> → أنشئ مشروعًا → Build → Realtime Database → Create (Test mode) → ومن صفحة المشروع اضغط أيقونة <span dir="ltr">&lt;/&gt;</span> وانسخ الكود.
+          </div>
+        </div>
+      </div>
+    </>
+  );
+
+  if(phase==="setup")return shell(
+    <>
+      {crest}
+      <div style={{maxWidth:420,margin:"24px auto",padding:"0 20px",display:"grid",gap:12}}>
+        <div style={{background:CARD,border:`1px solid ${LINE}`,borderRadius:18,padding:20,display:"grid",gap:12}}>
+          <div style={{fontWeight:800,fontSize:17}}>👋 أنت أول من يفتح الفعالية — أنت المنظم!</div>
+          <div style={{color:MUTE,fontSize:13}}>اختر اسم الفعالية ورمز الإدارة (تحتاجه لرصد النتائج وتحديث الهدافين يوميًا).</div>
+          <Input value={setupName} onChange={(e)=>setSetupName(e.target.value)} placeholder="اسم الفعالية"/>
+          <Input value={setupPin} onChange={(e)=>setSetupPin(e.target.value.replace(/[^0-9]/g,""))} placeholder="رمز الإدارة (٤ أرقام أو أكثر)" inputMode="numeric" center/>
+          <Btn gold full onClick={doSetup}>إنشاء الفعالية 🚀</Btn>
+        </div>
+      </div>
+    </>
+  );
+
+  if(phase==="login")return shell(
+    <>
+      {crest}
+      <div style={{maxWidth:420,margin:"16px auto",padding:"0 20px",display:"grid",gap:12}}>
+        <div style={{display:"flex",gap:8}}>
+          {[["register","مشارك جديد"],["login","تسجيل الدخول"]].map(([k,l])=>(
+            <button key={k} onClick={()=>setMode(k)} style={{flex:1,padding:"10px 0",borderRadius:12,fontFamily:"inherit",fontWeight:800,fontSize:14,cursor:"pointer",background:mode===k?GOLD:"transparent",color:mode===k?PITCH_D:CHALK,border:`1px solid ${mode===k?GOLD:LINE}`}}>{l}</button>
+          ))}
+        </div>
+        <div style={{background:CARD,border:`1px solid ${LINE}`,borderRadius:18,padding:20,display:"grid",gap:12}}>
+          <Input value={loginName} onChange={(e)=>setLoginName(e.target.value)} placeholder="اسمك في القروب"/>
+          <Input value={loginPin} onChange={(e)=>setLoginPin(e.target.value.replace(/[^0-9]/g,""))} placeholder="رمزك السري (٤ أرقام)" inputMode="numeric" center/>
+          {mode==="register"&&<Input value={scorerPick} onChange={(e)=>setScorerPick(e.target.value)} placeholder="توقعك لهداف البطولة 👟 (+10 نقاط)"/>}
+          <Btn gold full onClick={enter}>{mode==="register"?"سجلني في الفعالية ⚽":"دخول"}</Btn>
+          <div style={{color:MUTE,fontSize:12,textAlign:"center"}}>المسجلون حتى الآن: {users.length} مشارك</div>
+        </div>
+        <div style={{background:"rgba(232,195,90,0.08)",border:`1px dashed ${GOLD}`,borderRadius:14,padding:14,fontSize:13,lineHeight:1.9}}>
+          <b style={{color:GOLD}}>نظام النقاط:</b> النتيجة بالضبط = <b>3</b> نقاط · اتجاه النتيجة (فوز/تعادل/خسارة) = <b>1</b> نقطة · توقع الهداف الصحيح = <b>10</b> نقاط 🏆
+        </div>
+      </div>
+    </>
+  );
+
+  /* بطاقة مباراة */
+  const matchCard=(m)=>{
+    const id=m[0],locked=isLocked(m),res=results[mid(m)];
+    const pred=myPreds[mid(m)]||"";
+    const[ph,pa]=pred?pred.split("-"):["",""];
+    const pts=res?calcPts(pred&&/^\d+-\d+$/.test(pred)?pred:null,res):null;
+    const h=teamName(m,"h"),a=teamName(m,"a");
+    const stageLabel=id<=72?`المجموعة ${m[2]}`:m[2];
+    return(
+      <div style={{background:CARD,border:`1px solid ${res?"rgba(232,195,90,0.4)":LINE}`,borderRadius:16,padding:"14px 14px 12px"}}>
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:11.5,color:MUTE,marginBottom:10}}>
+          <span>مباراة {id} · {stageLabel}</span>
+          <span>{res?"✅ انتهت":locked?"🔒 جارية / مقفلة":`🕐 ${fmtTime(m)}`}</span>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr auto 1fr",alignItems:"center",gap:8}}>
+          <div style={{textAlign:"center"}}>
+            <div style={{fontSize:30}}>{flag(h)}</div>
+            <div style={{fontWeight:800,fontSize:13.5,marginTop:2}}>{h}</div>
+          </div>
+          <div style={{textAlign:"center",minWidth:92}}>
+            {res?<div style={{fontWeight:900,fontSize:26,color:GOLD,direction:"ltr"}}>{res.split("-")[0]} : {res.split("-")[1]}</div>
+               :<div style={{fontWeight:900,fontSize:16,color:MUTE}}>VS</div>}
+          </div>
+          <div style={{textAlign:"center"}}>
+            <div style={{fontSize:30}}>{flag(a)}</div>
+            <div style={{fontWeight:800,fontSize:13.5,marginTop:2}}>{a}</div>
+          </div>
+        </div>
+        <div style={{borderTop:`1px dashed ${LINE}`,marginTop:12,paddingTop:10,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+          <span style={{fontSize:12,color:MUTE}}>توقعك:</span>
+          <ScoreBox value={ph} disabled={locked} onChange={(v)=>setPred(id,"h",v)}/>
+          <span style={{color:MUTE,fontWeight:900}}>-</span>
+          <ScoreBox value={pa} disabled={locked} onChange={(v)=>setPred(id,"a",v)}/>
+          {pts!==null&&(
+            <span style={{marginRight:6,background:pts===3?GOLD:pts===1?"rgba(243,239,228,0.18)":"rgba(226,109,92,0.2)",color:pts===3?PITCH_D:pts===1?CHALK:RED,borderRadius:999,padding:"3px 12px",fontWeight:900,fontSize:13}}>
+              {pts===3?"🎯 +3":pts===1?"+1":"0"}
+            </span>
+          )}
+          {locked&&!res&&pred&&<span style={{fontSize:11.5,color:MUTE}}>توقعك: {pred}</span>}
+        </div>
+      </div>
+    );
+  };
+
+  const matchesTab=()=>(
+    <div>
+      <div style={{display:"flex",gap:8,overflowX:"auto",padding:"4px 2px 12px"}}>
+        {days.map((d)=>{
+          const sel=d===selDay,isToday=d===todayKey;
+          return(
+            <button key={d} onClick={()=>setSelDay(d)} style={{flexShrink:0,padding:"8px 14px",borderRadius:999,fontFamily:"inherit",fontWeight:800,fontSize:12.5,cursor:"pointer",background:sel?GOLD:"rgba(0,0,0,0.2)",color:sel?PITCH_D:CHALK,border:`1px solid ${sel?GOLD:isToday?GOLD:LINE}`}}>
+              {isToday?"📅 اليوم · ":""}{fmtDay(d)}
+            </button>
+          );
+        })}
+      </div>
+      <div style={{display:"grid",gap:10}}>
+        {dayMatches.map((m)=><React.Fragment key={m[0]}>{matchCard(m)}</React.Fragment>)}
+      </div>
+    </div>
+  );
+
+  const boardTab=()=>(
+    <div style={{display:"grid",gap:10}}>
+      <div style={{fontWeight:900,fontSize:18}}>🏅 ترتيب المشاركين ({users.length}) <span style={{fontSize:11,color:MUTE,fontWeight:600}}>· يتحدث مباشرة</span></div>
+      {board.length===0?(
+        <div style={{textAlign:"center",color:MUTE,padding:30}}>لا يوجد مشاركون بعد — شارك الرابط في القروب!</div>
+      ):board.map((r,i)=>(
+        <div key={r.name} style={{background:r.name===me.name?"rgba(232,195,90,0.12)":CARD,border:`1px solid ${r.name===me.name?GOLD:LINE}`,borderRadius:14,padding:"12px 14px",display:"flex",alignItems:"center",gap:12}}>
+          <div style={{fontSize:i<3?24:15,fontWeight:900,width:34,textAlign:"center",color:MUTE}}>
+            {i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}
+          </div>
+          <div style={{flex:1}}>
+            <div style={{fontWeight:800,fontSize:15}}>{r.name} {r.name===me.name&&<span style={{fontSize:11,color:GOLD}}>(أنت)</span>}</div>
+            <div style={{fontSize:11.5,color:MUTE}}>🎯 {r.exact} نتيجة دقيقة · ✔️ {r.hit} اتجاه صحيح{r.bonus?" · 👟 +10 هداف":""}{r.scorer?` · هدافه: ${r.scorer}`:""}</div>
+          </div>
+          <div style={{fontWeight:900,fontSize:22,color:GOLD}}>{r.pts}</div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const scorersTab=()=>(
+    <div style={{display:"grid",gap:10}}>
+      <div style={{fontWeight:900,fontSize:18}}>👟 هدافو البطولة</div>
+      {config&&config.topAnswer&&(
+        <div style={{background:"rgba(232,195,90,0.12)",border:`1px solid ${GOLD}`,borderRadius:14,padding:12,fontWeight:800}}>
+          🏆 الهداف الرسمي المعتمد: <span style={{color:GOLD}}>{config.topAnswer}</span>
+        </div>
+      )}
+      {scorers.length===0?(
+        <div style={{textAlign:"center",color:MUTE,padding:30}}>سيحدّث المنظم قائمة الهدافين يوميًا مع تقدم البطولة ⚽</div>
+      ):scorers.map((s,i)=>(
+        <div key={s.n} style={{background:CARD,border:`1px solid ${LINE}`,borderRadius:14,padding:"12px 14px",display:"flex",alignItems:"center",gap:12}}>
+          <div style={{width:28,textAlign:"center",fontWeight:900,color:MUTE}}>{i+1}</div>
+          <div style={{fontSize:24}}>{flag(s.t)}</div>
+          <div style={{flex:1,fontWeight:800}}>{s.n} <span style={{fontSize:12,color:MUTE}}>({s.t})</span></div>
+          <div style={{fontWeight:900,fontSize:18,color:GOLD}}>{s.g} ⚽</div>
+        </div>
+      ))}
+      <div style={{background:CARD,border:`1px dashed ${LINE}`,borderRadius:14,padding:12,fontSize:13,color:MUTE}}>
+        توقعك للهداف: <b style={{color:CHALK}}>{me.scorer||"لم تختر"}</b> — إذا صح توقعك تحصل على <b style={{color:GOLD}}>+10 نقاط</b> في نهاية البطولة.
+      </div>
+    </div>
+  );
+
+  const adminTab=()=>{
+    if(!isAdmin)return(
+      <div style={{maxWidth:360,margin:"20px auto",display:"grid",gap:10}}>
+        <div style={{fontWeight:900,fontSize:17,textAlign:"center"}}>🔐 لوحة المنظم</div>
+        <Input value={adminPinTry} onChange={(e)=>setAdminPinTry(e.target.value)} placeholder="رمز الإدارة" inputMode="numeric" center/>
+        <Btn gold full onClick={()=>{if(adminPinTry===config.adminPin){setIsAdmin(true);flash("أهلًا بالمنظم 👑");}else flash("الرمز غير صحيح");}}>دخول</Btn>
+      </div>
+    );
+    const started=ALL.filter((m)=>isLocked(m));
+    const pending=started.filter((m)=>!results[mid(m)]);
+    const done=started.filter((m)=>results[mid(m)]).reverse();
+    const resRow=(m)=>{
+      const id=m[0],d=resDraft[id]||{h:"",a:""};
+      return(
+        <div style={{background:CARD,border:`1px solid ${LINE}`,borderRadius:12,padding:10,display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+          <div style={{flex:1,fontSize:13,fontWeight:700,minWidth:150}}>
+            {flag(teamName(m,"h"))} {teamName(m,"h")} × {teamName(m,"a")} {flag(teamName(m,"a"))}
+            <div style={{fontSize:11,color:MUTE}}>مباراة {id} · {fmtDay(dayKey(m))}{results[mid(m)]?` · النتيجة الحالية ${results[mid(m)]}`:""}</div>
+          </div>
+          <ScoreBox value={d.h} onChange={(v)=>setResDraft((p)=>({...p,[id]:{...d,h:v}}))}/>
+          <span style={{fontWeight:900,color:MUTE}}>-</span>
+          <ScoreBox value={d.a} onChange={(v)=>setResDraft((p)=>({...p,[id]:{...d,a:v}}))}/>
+          <Btn small gold onClick={()=>saveResult(id)}>رصد</Btn>
+          {results[mid(m)]&&<Btn small danger onClick={()=>clearResult(id)}>حذف</Btn>}
+        </div>
+      );
+    };
+    return(
+      <div style={{display:"grid",gap:18}}>
+        <div style={{background:"rgba(232,195,90,0.1)",border:`1px solid ${GOLD}`,borderRadius:14,padding:12,display:"grid",gap:8}}>
+          <div style={{fontWeight:900,fontSize:14}}>🔗 رابط الفعالية — أرسل هذا بالضبط في القروب:</div>
+          <div dir="ltr" style={{fontSize:11,wordBreak:"break-all",background:"rgba(0,0,0,0.25)",borderRadius:10,padding:8,color:CHALK}}>{shareLink()}</div>
+          <Btn small gold onClick={()=>{try{navigator.clipboard.writeText(shareLink());flash("تم نسخ الرابط 📋");}catch(e){flash("انسخه يدويًا من الأعلى");}}}>نسخ الرابط 📋</Btn>
+        </div>
+        <div>
+          <div style={{fontWeight:900,fontSize:16,marginBottom:8}}>📋 رصد النتائج — مباريات بانتظار النتيجة ({pending.length})</div>
+          <div style={{display:"grid",gap:8}}>
+            {pending.length===0?<div style={{color:MUTE,fontSize:13}}>لا توجد مباريات منتهية بدون نتيجة 👌</div>:pending.map((m)=><React.Fragment key={m[0]}>{resRow(m)}</React.Fragment>)}
+          </div>
+        </div>
+        {done.length>0&&(
+          <div>
+            <div style={{fontWeight:900,fontSize:16,marginBottom:8}}>✅ نتائج مرصودة (آخر 10) — يمكن تعديلها</div>
+            <div style={{display:"grid",gap:8}}>{done.slice(0,10).map((m)=><React.Fragment key={m[0]}>{resRow(m)}</React.Fragment>)}</div>
+          </div>
+        )}
+        <div>
+          <div style={{fontWeight:900,fontSize:16,marginBottom:8}}>👟 تحديث الهدافين (يوميًا)</div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:8}}>
+            <Input value={scDraft.n} onChange={(e)=>setScDraft({...scDraft,n:e.target.value})} placeholder="اسم اللاعب" style={{flex:2,minWidth:120}}/>
+            <Input value={scDraft.t} onChange={(e)=>setScDraft({...scDraft,t:e.target.value})} placeholder="المنتخب" style={{flex:1,minWidth:90}}/>
+            <Input value={scDraft.g} onChange={(e)=>setScDraft({...scDraft,g:e.target.value.replace(/[^0-9]/g,"")})} placeholder="أهداف" inputMode="numeric" center style={{width:70,flex:"0 0 70px"}}/>
+            <Btn small gold onClick={addScorer}>حفظ</Btn>
+          </div>
+          {scorers.map((s)=>(
+            <div key={s.n} style={{display:"flex",justifyContent:"space-between",padding:"6px 4px",fontSize:13,borderBottom:`1px dashed ${LINE}`}}>
+              <span>{flag(s.t)} {s.n} — {s.g} ⚽</span>
+              <button onClick={()=>delScorer(s.n)} style={{background:"none",border:"none",color:RED,cursor:"pointer",fontFamily:"inherit"}}>حذف</button>
+            </div>
+          ))}
+          <div style={{display:"flex",gap:8,marginTop:10}}>
+            <Input value={topDraft} onChange={(e)=>setTopDraft(e.target.value)} placeholder="الهداف الرسمي بنهاية البطولة (لاحتساب +10)"/>
+            <Btn small gold onClick={saveTopAnswer}>اعتماد</Btn>
+          </div>
+        </div>
+        <div>
+          <div style={{fontWeight:900,fontSize:16,marginBottom:8}}>🗂️ تحديد فرق الأدوار الإقصائية (عند تأهلها)</div>
+          <div style={{display:"grid",gap:8}}>
+            {KO.map((m)=>{
+              const id=m[0],d=koDraft[id]||{};
+              const cur=koTeams["m"+id]||{};
+              return(
+                <div key={id} style={{background:CARD,border:`1px solid ${LINE}`,borderRadius:12,padding:10}}>
+                  <div style={{fontSize:11.5,color:MUTE,marginBottom:6}}>مباراة {id} · {m[2]} · {fmtDay(dayKey(m))} {fmtTime(m)}</div>
+                  <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                    <Input value={d.h!==undefined?d.h:(cur.h||"")} onChange={(e)=>setKoDraft((p)=>({...p,[id]:{...d,h:e.target.value}}))} placeholder={m[3]} style={{flex:1,minWidth:110,fontSize:13,padding:"8px 10px"}}/>
+                    <Input value={d.a!==undefined?d.a:(cur.a||"")} onChange={(e)=>setKoDraft((p)=>({...p,[id]:{...d,a:e.target.value}}))} placeholder={m[4]} style={{flex:1,minWidth:110,fontSize:13,padding:"8px 10px"}}/>
+                    <Btn small onClick={()=>saveKoTeam(id)}>حفظ</Btn>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const TABS=[["matches","⚽","المباريات"],["board","🏅","الترتيب"],["scorers","👟","الهدافون"],["admin","🛠️","الإدارة"]];
+  return shell(
+    <>
+      <div style={{maxWidth:560,margin:"0 auto",padding:"0 14px 110px"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"18px 2px 12px"}}>
+          <div>
+            <div style={{fontWeight:900,fontSize:19,color:GOLD}}>🏆 {config&&config.eventName}</div>
+            <div style={{fontSize:12,color:MUTE}}>أهلًا {me.name} · {users.length} مشارك · توقيت السعودية</div>
+          </div>
+          <button onClick={()=>{setPhase("login");setMe(null);setIsAdmin(false);setLoginPin("");try{localStorage.removeItem("wc26me");}catch(e){}}} style={{background:"none",border:`1px solid ${LINE}`,color:MUTE,borderRadius:10,padding:"6px 12px",fontSize:12,fontFamily:"inherit",cursor:"pointer"}}>خروج</button>
+        </div>
+        {tab==="matches"&&matchesTab()}
+        {tab==="board"&&boardTab()}
+        {tab==="scorers"&&scorersTab()}
+        {tab==="admin"&&adminTab()}
+      </div>
+
+      {dirty&&tab==="matches"&&(
+        <div style={{position:"fixed",bottom:78,left:0,right:0,display:"flex",justifyContent:"center",zIndex:60}}>
+          <button onClick={savePreds} style={{background:GOLD,color:PITCH_D,border:"none",borderRadius:999,padding:"13px 34px",fontWeight:900,fontSize:15,fontFamily:"inherit",cursor:"pointer",boxShadow:"0 8px 24px rgba(0,0,0,0.45)"}}>
+            💾 حفظ التوقعات
+          </button>
+        </div>
+      )}
+
+      <div style={{position:"fixed",bottom:0,left:0,right:0,background:PITCH_D,borderTop:`1px solid ${LINE}`,display:"flex",justifyContent:"space-around",padding:"8px 0 14px",zIndex:50}}>
+        {TABS.map(([k,ic,l])=>(
+          <button key={k} onClick={()=>setTab(k)} style={{background:"none",border:"none",fontFamily:"inherit",cursor:"pointer",color:tab===k?GOLD:MUTE,fontWeight:800,fontSize:11.5,display:"grid",justifyItems:"center",gap:2}}>
+            <span style={{fontSize:20}}>{ic}</span>{l}
+          </button>
+        ))}
+      </div>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
