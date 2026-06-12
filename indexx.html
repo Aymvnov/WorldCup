@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>فعالية توقعات كأس العالم 2026 🏆</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<style>
+  body{margin:0;font-family:'Cairo','Segoe UI',sans-serif}
+  ::-webkit-scrollbar{height:6px;width:6px}
+  ::-webkit-scrollbar-thumb{background:rgba(243,239,228,0.14);border-radius:3px}
+  input::placeholder{color:rgba(243,239,228,0.35)}
+</style>
+<script>
+/* ============================================================
+   ⚙️ إعدادات قاعدة البيانات (تعبيها مرة واحدة فقط)
+   1) ادخل https://console.firebase.google.com وسجل بحساب قوقل
+   2) Add project → أي اسم → أكمل (عطل Analytics إذا تبي)
+   3) من القائمة: Build → Realtime Database → Create Database
+      → اختر "Start in test mode" → Enable
+   4) من تبويب Rules اجعلها:  { "rules": { ".read": true, ".write": true } }
+   5) ارجع لصفحة المشروع → أيقونة </> (Web) → سجل التطبيق
+      → انسخ القيم من firebaseConfig والصقها تحت 👇
+   ============================================================ */
+const FIREBASE_CONFIG = {
+  apiKey: "ضع_القيمة_هنا",
+  authDomain: "ضع_القيمة_هنا",
+  databaseURL: "ضع_القيمة_هنا",
+  projectId: "ضع_القيمة_هنا",
+  storageBucket: "ضع_القيمة_هنا",
+  messagingSenderId: "ضع_القيمة_هنا",
+  appId: "ضع_القيمة_هنا"
+};
+</script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+"use strict";
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
+const { useState, useEffect, useMemo } = React;
+/* ====== ألوان ====== */
+const GOLD = "#E8C35A", PITCH = "#0D3B2E", PITCH_D = "#092A20", CARD = "#114435", LINE = "rgba(243,239,228,0.14)", CHALK = "#F3EFE4", MUTE = "rgba(243,239,228,0.62)", RED = "#E26D5C";
+/* ====== أعلام ====== */
+const FLAGS = { "المكسيك": "🇲🇽", "جنوب أفريقيا": "🇿🇦", "كوريا الجنوبية": "🇰🇷", "التشيك": "🇨🇿", "كندا": "🇨🇦", "البوسنة والهرسك": "🇧🇦", "الولايات المتحدة": "🇺🇸", "باراغواي": "🇵🇾", "قطر": "🇶🇦", "سويسرا": "🇨🇭", "البرازيل": "🇧🇷", "المغرب": "🇲🇦", "هايتي": "🇭🇹", "أسكتلندا": "🏴󠁧󠁢󠁳󠁣󠁴󠁿", "أستراليا": "🇦🇺", "تركيا": "🇹🇷", "ألمانيا": "🇩🇪", "كوراساو": "🇨🇼", "هولندا": "🇳🇱", "اليابان": "🇯🇵", "ساحل العاج": "🇨🇮", "الإكوادور": "🇪🇨", "السويد": "🇸🇪", "تونس": "🇹🇳", "إسبانيا": "🇪🇸", "الرأس الأخضر": "🇨🇻", "بلجيكا": "🇧🇪", "مصر": "🇪🇬", "السعودية": "🇸🇦", "أوروغواي": "🇺🇾", "إيران": "🇮🇷", "نيوزيلندا": "🇳🇿", "فرنسا": "🇫🇷", "السنغال": "🇸🇳", "العراق": "🇮🇶", "النرويج": "🇳🇴", "الأرجنتين": "🇦🇷", "الجزائر": "🇩🇿", "النمسا": "🇦🇹", "الأردن": "🇯🇴", "البرتغال": "🇵🇹", "الكونغو الديمقراطية": "🇨🇩", "إنجلترا": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "كرواتيا": "🇭🇷", "غانا": "🇬🇭", "بنما": "🇵🇦", "أوزبكستان": "🇺🇿", "كولومبيا": "🇨🇴" };
+const flag = (t) => FLAGS[t] || "⚽";
+/* ====== جدول المباريات (توقيت السعودية GMT+3) ====== */
+const GROUP = [
+    [1, "2026-06-11T22:00", "A", "المكسيك", "جنوب أفريقيا"], [2, "2026-06-12T05:00", "A", "كوريا الجنوبية", "التشيك"],
+    [3, "2026-06-12T22:00", "B", "كندا", "البوسنة والهرسك"], [4, "2026-06-13T04:00", "D", "الولايات المتحدة", "باراغواي"],
+    [5, "2026-06-13T22:00", "B", "قطر", "سويسرا"], [6, "2026-06-14T01:00", "C", "البرازيل", "المغرب"],
+    [7, "2026-06-14T04:00", "C", "هايتي", "أسكتلندا"], [8, "2026-06-14T07:00", "D", "أستراليا", "تركيا"],
+    [9, "2026-06-14T20:00", "E", "ألمانيا", "كوراساو"], [10, "2026-06-14T23:00", "F", "هولندا", "اليابان"],
+    [11, "2026-06-15T02:00", "E", "ساحل العاج", "الإكوادور"], [12, "2026-06-15T05:00", "F", "السويد", "تونس"],
+    [13, "2026-06-15T07:00", "H", "إسبانيا", "الرأس الأخضر"], [14, "2026-06-15T22:00", "G", "بلجيكا", "مصر"],
+    [15, "2026-06-16T01:00", "H", "السعودية", "أوروغواي"], [16, "2026-06-16T04:00", "G", "إيران", "نيوزيلندا"],
+    [17, "2026-06-16T22:00", "I", "فرنسا", "السنغال"], [18, "2026-06-17T01:00", "I", "العراق", "النرويج"],
+    [19, "2026-06-17T04:00", "J", "الأرجنتين", "الجزائر"], [20, "2026-06-17T07:00", "J", "النمسا", "الأردن"],
+    [21, "2026-06-17T20:00", "K", "البرتغال", "الكونغو الديمقراطية"], [22, "2026-06-17T23:00", "L", "إنجلترا", "كرواتيا"],
+    [23, "2026-06-18T02:00", "L", "غانا", "بنما"], [24, "2026-06-18T05:00", "K", "أوزبكستان", "كولومبيا"],
+    [25, "2026-06-18T19:00", "A", "التشيك", "جنوب أفريقيا"], [26, "2026-06-18T22:00", "B", "سويسرا", "البوسنة والهرسك"],
+    [27, "2026-06-19T01:00", "B", "كندا", "قطر"], [28, "2026-06-19T04:00", "A", "المكسيك", "كوريا الجنوبية"],
+    [29, "2026-06-19T22:00", "D", "الولايات المتحدة", "أستراليا"], [30, "2026-06-20T01:00", "C", "أسكتلندا", "المغرب"],
+    [31, "2026-06-20T03:30", "C", "البرازيل", "هايتي"], [32, "2026-06-20T06:00", "D", "تركيا", "باراغواي"],
+    [33, "2026-06-20T20:00", "F", "هولندا", "السويد"], [34, "2026-06-20T23:00", "E", "ألمانيا", "ساحل العاج"],
+    [35, "2026-06-21T03:00", "E", "الإكوادور", "كوراساو"], [36, "2026-06-21T07:00", "F", "تونس", "اليابان"],
+    [37, "2026-06-21T19:00", "H", "إسبانيا", "السعودية"], [38, "2026-06-21T22:00", "G", "بلجيكا", "إيران"],
+    [39, "2026-06-22T01:00", "H", "أوروغواي", "الرأس الأخضر"], [40, "2026-06-22T04:00", "G", "نيوزيلندا", "مصر"],
+    [41, "2026-06-22T20:00", "J", "الأرجنتين", "النمسا"], [42, "2026-06-23T00:00", "I", "فرنسا", "العراق"],
+    [43, "2026-06-23T03:00", "I", "النرويج", "السنغال"], [44, "2026-06-23T06:00", "J", "الأردن", "الجزائر"],
+    [45, "2026-06-23T20:00", "K", "البرتغال", "أوزبكستان"], [46, "2026-06-23T23:00", "L", "إنجلترا", "غانا"],
+    [47, "2026-06-24T02:00", "L", "بنما", "كرواتيا"], [48, "2026-06-24T05:00", "K", "كولومبيا", "الكونغو الديمقراطية"],
+    [49, "2026-06-24T22:00", "B", "سويسرا", "كندا"], [50, "2026-06-24T22:00", "B", "البوسنة والهرسك", "قطر"],
+    [51, "2026-06-25T01:00", "C", "أسكتلندا", "البرازيل"], [52, "2026-06-25T01:00", "C", "المغرب", "هايتي"],
+    [53, "2026-06-25T04:00", "A", "التشيك", "المكسيك"], [54, "2026-06-25T04:00", "A", "جنوب أفريقيا", "كوريا الجنوبية"],
+    [55, "2026-06-25T23:00", "E", "الإكوادور", "ألمانيا"], [56, "2026-06-25T23:00", "E", "كوراساو", "ساحل العاج"],
+    [57, "2026-06-26T02:00", "F", "تونس", "هولندا"], [58, "2026-06-26T02:00", "F", "اليابان", "السويد"],
+    [59, "2026-06-26T05:00", "D", "تركيا", "الولايات المتحدة"], [60, "2026-06-26T05:00", "D", "باراغواي", "أستراليا"],
+    [61, "2026-06-26T22:00", "I", "النرويج", "فرنسا"], [62, "2026-06-26T22:00", "I", "السنغال", "العراق"],
+    [63, "2026-06-27T03:00", "H", "أوروغواي", "إسبانيا"], [64, "2026-06-27T03:00", "H", "الرأس الأخضر", "السعودية"],
+    [65, "2026-06-27T06:00", "G", "نيوزيلندا", "بلجيكا"], [66, "2026-06-27T06:00", "G", "مصر", "إيران"],
+    [67, "2026-06-28T00:00", "L", "بنما", "إنجلترا"], [68, "2026-06-28T00:00", "L", "كرواتيا", "غانا"],
+    [69, "2026-06-28T02:30", "K", "كولومبيا", "البرتغال"], [70, "2026-06-28T02:30", "K", "الكونغو الديمقراطية", "أوزبكستان"],
+    [71, "2026-06-28T05:00", "J", "الأردن", "الأرجنتين"], [72, "2026-06-28T05:00", "J", "الجزائر", "النمسا"],
+];
+const KO = [
+    [73, "2026-06-28T22:00", "دور الـ32", "ثاني المجموعة A", "ثاني المجموعة B"],
+    [74, "2026-06-29T20:00", "دور الـ32", "أول المجموعة C", "ثاني المجموعة F"],
+    [75, "2026-06-29T23:30", "دور الـ32", "أول المجموعة E", "أفضل ثالث"],
+    [76, "2026-06-30T04:00", "دور الـ32", "أول المجموعة F", "ثاني المجموعة C"],
+    [77, "2026-06-30T20:00", "دور الـ32", "ثاني المجموعة E", "ثاني المجموعة I"],
+    [78, "2026-07-01T00:00", "دور الـ32", "أول المجموعة I", "أفضل ثالث"],
+    [79, "2026-07-01T04:00", "دور الـ32", "أول المجموعة A", "أفضل ثالث"],
+    [80, "2026-07-01T19:00", "دور الـ32", "أول المجموعة L", "أفضل ثالث"],
+    [81, "2026-07-01T23:00", "دور الـ32", "أول المجموعة G", "أفضل ثالث"],
+    [82, "2026-07-02T03:00", "دور الـ32", "أول المجموعة D", "أفضل ثالث"],
+    [83, "2026-07-02T22:00", "دور الـ32", "أول المجموعة H", "ثاني المجموعة J"],
+    [84, "2026-07-03T02:00", "دور الـ32", "ثاني المجموعة K", "ثاني المجموعة L"],
+    [85, "2026-07-03T06:00", "دور الـ32", "أول المجموعة B", "أفضل ثالث"],
+    [86, "2026-07-03T21:00", "دور الـ32", "ثاني المجموعة D", "ثاني المجموعة G"],
+    [87, "2026-07-04T01:00", "دور الـ32", "أول المجموعة J", "ثاني المجموعة H"],
+    [88, "2026-07-04T04:30", "دور الـ32", "أول المجموعة K", "أفضل ثالث"],
+    [89, "2026-07-04T20:00", "ثمن النهائي", "الفائز من 73", "الفائز من 75"],
+    [90, "2026-07-05T00:00", "ثمن النهائي", "الفائز من 74", "الفائز من 77"],
+    [91, "2026-07-05T23:00", "ثمن النهائي", "الفائز من 76", "الفائز من 78"],
+    [92, "2026-07-06T03:00", "ثمن النهائي", "الفائز من 79", "الفائز من 80"],
+    [93, "2026-07-06T22:00", "ثمن النهائي", "الفائز من 83", "الفائز من 84"],
+    [94, "2026-07-07T03:00", "ثمن النهائي", "الفائز من 81", "الفائز من 82"],
+    [95, "2026-07-07T07:00", "ثمن النهائي", "الفائز من 86", "الفائز من 88"],
+    [96, "2026-07-07T23:00", "ثمن النهائي", "الفائز من 85", "الفائز من 87"],
+    [97, "2026-07-09T23:00", "ربع النهائي", "الفائز من 89", "الفائز من 90"],
+    [98, "2026-07-10T22:00", "ربع النهائي", "الفائز من 93", "الفائز من 94"],
+    [99, "2026-07-12T00:00", "ربع النهائي", "الفائز من 91", "الفائز من 92"],
+    [100, "2026-07-12T04:00", "ربع النهائي", "الفائز من 95", "الفائز من 96"],
+    [101, "2026-07-14T22:00", "نصف النهائي", "الفائز من 97", "الفائز من 98"],
+    [102, "2026-07-15T22:00", "نصف النهائي", "الفائز من 99", "الفائز من 100"],
+    [103, "2026-07-19T00:00", "المركز الثالث", "خاسر نصف النهائي 1", "خاسر نصف النهائي 2"],
+    [104, "2026-07-19T22:00", "النهائي", "الفائز من نصف النهائي 1", "الفائز من نصف النهائي 2"],
+];
+const ALL = [...GROUP, ...KO];
+/* ====== أدوات ====== */
+const mid = (m) => "m" + m[0];
+const kickoff = (m) => new Date(m[1] + ":00+03:00");
+const DAYS_AR = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+const MONTHS_AR = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+const dayKey = (m) => m[1].slice(0, 10);
+const fmtDay = (k) => { const d = new Date(k + "T12:00:00Z"); return `${DAYS_AR[d.getUTCDay()]} ${parseInt(k.slice(8, 10))} ${MONTHS_AR[parseInt(k.slice(5, 7)) - 1]}`; };
+const fmtTime = (m) => { const [h, mi] = m[1].slice(11).split(":"); const hh = parseInt(h); const ap = hh < 12 ? "ص" : "م"; const h12 = hh % 12 === 0 ? 12 : hh % 12; return `${h12}:${mi} ${ap}`; };
+const outcome = (s) => { const [a, b] = s.split("-").map(Number); return a > b ? 1 : a < b ? -1 : 0; };
+const calcPts = (pred, res) => { if (!pred || !res)
+    return null; if (pred === res)
+    return 3; return outcome(pred) === outcome(res) ? 1 : 0; };
+const safeName = (n) => n.replace(/[.#$\[\]\/]/g, "_");
+/* ====== قاعدة البيانات ====== */
+function readCfg() {
+    if (FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes("ضع"))
+        return FIREBASE_CONFIG;
+    try {
+        const m = location.hash.match(/cfg=([^&]+)/);
+        if (m) {
+            const cfg = JSON.parse(atob(decodeURIComponent(m[1])));
+            if (cfg && cfg.apiKey) {
+                try {
+                    localStorage.setItem("wc26cfg", JSON.stringify(cfg));
+                }
+                catch (e) { }
+                return cfg;
+            }
+        }
+    }
+    catch (e) { }
+    try {
+        const s = localStorage.getItem("wc26cfg");
+        if (s)
+            return JSON.parse(s);
+    }
+    catch (e) { }
+    return null;
+}
+const FB_CFG = readCfg();
+let db = null;
+if (FB_CFG) {
+    try {
+        firebase.initializeApp(FB_CFG);
+        db = firebase.database();
+    }
+    catch (e) { }
+}
+const configured = !!db;
+const shareLink = () => FB_CFG ? location.origin + location.pathname + "#cfg=" + encodeURIComponent(btoa(JSON.stringify(FB_CFG))) : "";
+const P = "wc26";
+const dbGet = async (path) => { try {
+    const s = await db.ref(P + "/" + path).get();
+    return s.val();
+}
+catch (e) {
+    return null;
+} };
+const dbSet = async (path, v) => { try {
+    await db.ref(P + "/" + path).set(v);
+    return true;
+}
+catch (e) {
+    return false;
+} };
+/* ====== عناصر مشتركة ====== */
+const Btn = ({ children, onClick, gold, full, small, danger, disabled }) => (React.createElement("button", { onClick: onClick, disabled: disabled, style: {
+        background: gold ? GOLD : danger ? "transparent" : "rgba(243,239,228,0.08)",
+        color: gold ? PITCH_D : danger ? RED : CHALK,
+        border: danger ? `1px solid ${RED}` : `1px solid ${gold ? GOLD : LINE}`,
+        borderRadius: 12, fontWeight: 700, fontFamily: "inherit",
+        padding: small ? "6px 12px" : "12px 18px", fontSize: small ? 13 : 15,
+        width: full ? "100%" : "auto", opacity: disabled ? 0.45 : 1, cursor: disabled ? "default" : "pointer"
+    } }, children));
+const Input = (_a) => {
+    var { center, style } = _a, p = __rest(_a, ["center", "style"]);
+    return (React.createElement("input", Object.assign({}, p, { style: Object.assign({ background: "rgba(0,0,0,0.25)", border: `1px solid ${LINE}`, color: CHALK, borderRadius: 12, padding: "12px 14px", fontSize: 15, width: "100%", boxSizing: "border-box", fontFamily: "inherit", outline: "none", textAlign: center ? "center" : "right" }, style) })));
+};
+const ScoreBox = ({ value, onChange, disabled }) => (React.createElement("input", { inputMode: "numeric", pattern: "[0-9]*", maxLength: 2, value: value, disabled: disabled, onChange: (e) => onChange(e.target.value.replace(/[^0-9]/g, "")), placeholder: "-", style: { width: 44, height: 44, textAlign: "center", fontSize: 18, fontWeight: 800,
+        background: disabled ? "rgba(0,0,0,0.15)" : "rgba(0,0,0,0.3)",
+        border: `1.5px solid ${value !== "" ? GOLD : LINE}`, color: value !== "" ? GOLD : CHALK,
+        borderRadius: 10, fontFamily: "inherit", outline: "none", opacity: disabled ? 0.5 : 1, boxSizing: "border-box" } }));
+/* ====== التطبيق ====== */
+function App() {
+    const [phase, setPhase] = useState("loading");
+    const [config, setConfig] = useState(null);
+    const [users, setUsers] = useState([]);
+    const [me, setMe] = useState(null);
+    const [tab, setTab] = useState("matches");
+    const [results, setResults] = useState({});
+    const [koTeams, setKoTeams] = useState({});
+    const [myPreds, setMyPreds] = useState({});
+    const [dirty, setDirty] = useState(false);
+    const [allPreds, setAllPreds] = useState({});
+    const [scorers, setScorers] = useState([]);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [toast, setToast] = useState("");
+    const [now, setNow] = useState(new Date());
+    useEffect(() => { const t = setInterval(() => setNow(new Date()), 30000); return () => clearInterval(t); }, []);
+    const flash = (m) => { setToast(m); setTimeout(() => setToast(""), 2500); };
+    /* تحميل + استماع حي */
+    useEffect(() => {
+        if (!configured || !db) {
+            setPhase("noconfig");
+            return;
+        }
+        let first = true;
+        db.ref(P + "/config").on("value", (s) => {
+            const cfg = s.val();
+            setConfig(cfg);
+            if (first) {
+                setPhase(cfg ? "login" : "setup");
+                first = false;
+            }
+            else if (!cfg)
+                setPhase("setup");
+        }, () => setPhase("dberror"));
+        db.ref(P + "/users").on("value", (s) => { const v = s.val() || {}; setUsers(Object.values(v)); });
+        db.ref(P + "/results").on("value", (s) => setResults(s.val() || {}));
+        db.ref(P + "/teams").on("value", (s) => setKoTeams(s.val() || {}));
+        db.ref(P + "/scorers").on("value", (s) => setScorers(s.val() || []));
+        db.ref(P + "/preds").on("value", (s) => setAllPreds(s.val() || {}));
+        return () => db.ref(P).off();
+    }, []);
+    const teamName = (m, side) => { const o = koTeams[mid(m)]; return o && o[side] ? o[side] : m[side === "h" ? 3 : 4]; };
+    const isLocked = (m) => now >= kickoff(m);
+    /* إعداد الفعالية */
+    const [setupName, setSetupName] = useState("فعالية كأس العالم 2026");
+    const [setupPin, setSetupPin] = useState("");
+    const doSetup = async () => {
+        if (setupPin.length < 4)
+            return flash("اختر رمز إدارة من 4 أرقام على الأقل");
+        const cfg = { eventName: setupName.trim() || "فعالية كأس العالم 2026", adminPin: setupPin, topAnswer: "" };
+        const ok = await dbSet("config", cfg);
+        if (ok) {
+            setConfig(cfg);
+            setPhase("login");
+            flash("تم إنشاء الفعالية 🎉");
+        }
+        else
+            flash("تعذر الاتصال بقاعدة البيانات");
+    };
+    /* تسجيل / دخول */
+    const [loginName, setLoginName] = useState("");
+    const [loginPin, setLoginPin] = useState("");
+    const [scorerPick, setScorerPick] = useState("");
+    const [mode, setMode] = useState("register");
+    const enter = async () => {
+        const name = loginName.trim();
+        if (!name || loginPin.length < 4)
+            return flash("اكتب اسمك ورمزًا سريًا من 4 أرقام");
+        const key = safeName(name);
+        const found = await dbGet("users/" + key);
+        if (mode === "register") {
+            if (found)
+                return flash("الاسم مسجل من قبل — ادخل من «تسجيل الدخول»");
+            const u = { name, pin: loginPin, scorer: scorerPick.trim(), joined: Date.now() };
+            const ok = await dbSet("users/" + key, u);
+            if (!ok)
+                return flash("تعذر التسجيل، حاول مرة أخرى");
+            setMe(u);
+        }
+        else {
+            if (!found)
+                return flash("الاسم غير موجود — سجل أولًا");
+            if (found.pin !== loginPin)
+                return flash("الرمز السري غير صحيح");
+            setMe(found);
+        }
+        const preds = (await dbGet("preds/" + key)) || {};
+        setMyPreds(preds);
+        try {
+            localStorage.setItem("wc26me", JSON.stringify({ name, pin: loginPin }));
+        }
+        catch (e) { }
+        setPhase("main");
+        setTab("matches");
+    };
+    /* دخول تلقائي إذا سبق التسجيل من نفس الجوال */
+    useEffect(() => {
+        if (phase !== "login")
+            return;
+        try {
+            const saved = JSON.parse(localStorage.getItem("wc26me") || "null");
+            if (saved && saved.name) {
+                setLoginName(saved.name);
+                setLoginPin(saved.pin || "");
+                setMode("login");
+            }
+        }
+        catch (e) { }
+    }, [phase]);
+    /* حفظ التوقعات */
+    const setPred = (id, side, val) => {
+        setMyPreds((p) => {
+            const k = "m" + id;
+            const cur = p[k] ? p[k].split("-") : ["", ""];
+            if (side === "h")
+                cur[0] = val;
+            else
+                cur[1] = val;
+            const v = `${cur[0]}-${cur[1]}`;
+            const np = Object.assign({}, p);
+            if (v === "-")
+                delete np[k];
+            else
+                np[k] = v;
+            return np;
+        });
+        setDirty(true);
+    };
+    const savePreds = async () => {
+        const key = safeName(me.name);
+        const clean = {};
+        for (const [k, v] of Object.entries(myPreds)) {
+            if (v && /^\d+-\d+$/.test(v))
+                clean[k] = v;
+        }
+        const old = (await dbGet("preds/" + key)) || {};
+        for (const m of ALL)
+            if (isLocked(m)) {
+                if (old[mid(m)])
+                    clean[mid(m)] = old[mid(m)];
+                else
+                    delete clean[mid(m)];
+            }
+        const ok = await dbSet("preds/" + key, clean);
+        if (ok) {
+            setMyPreds(clean);
+            setDirty(false);
+            flash("تم حفظ توقعاتك ✅");
+        }
+        else
+            flash("تعذر الحفظ، حاول مرة أخرى");
+    };
+    /* الترتيب (حي مباشرة) */
+    const board = useMemo(() => {
+        return users.map((u) => {
+            let pts = 0, exact = 0, hit = 0;
+            const preds = allPreds[safeName(u.name)] || {};
+            for (const [id, res] of Object.entries(results)) {
+                const p = calcPts(preds[id], res);
+                if (p === 3) {
+                    pts += 3;
+                    exact++;
+                }
+                else if (p === 1) {
+                    pts += 1;
+                    hit++;
+                }
+            }
+            let bonus = 0;
+            if (config && config.topAnswer && u.scorer && u.scorer.trim() === config.topAnswer.trim())
+                bonus = 10;
+            return { name: u.name, pts: pts + bonus, exact, hit, bonus, scorer: u.scorer };
+        }).sort((a, b) => b.pts - a.pts || b.exact - a.exact);
+    }, [users, allPreds, results, config]);
+    /* الإدارة */
+    const [adminPinTry, setAdminPinTry] = useState("");
+    const [resDraft, setResDraft] = useState({});
+    const [koDraft, setKoDraft] = useState({});
+    const [scDraft, setScDraft] = useState({ n: "", t: "", g: "" });
+    const [topDraft, setTopDraft] = useState("");
+    const saveResult = async (id) => {
+        const d = resDraft[id];
+        if (!d || !/^\d+$/.test(d.h || "") || !/^\d+$/.test(d.a || ""))
+            return flash("أدخل نتيجة صحيحة");
+        const ok = await dbSet("results/m" + id, `${d.h}-${d.a}`);
+        if (ok)
+            flash(`تم رصد نتيجة المباراة ${id} ✅`);
+    };
+    const clearResult = async (id) => { await db.ref(P + "/results/m" + id).remove(); flash("تم حذف النتيجة"); };
+    const saveKoTeam = async (id) => {
+        const d = koDraft[id];
+        if (!d)
+            return;
+        const cur = koTeams["m" + id] || {};
+        const ok = await dbSet("teams/m" + id, { h: d.h !== undefined ? d.h : (cur.h || ""), a: d.a !== undefined ? d.a : (cur.a || "") });
+        if (ok)
+            flash("تم تحديث الفرق ✅");
+    };
+    const addScorer = async () => {
+        if (!scDraft.n.trim())
+            return;
+        const sc = [...scorers.filter((s) => s.n !== scDraft.n.trim()), { n: scDraft.n.trim(), t: scDraft.t.trim(), g: Number(scDraft.g) || 0 }];
+        sc.sort((a, b) => b.g - a.g);
+        const ok = await dbSet("scorers", sc);
+        if (ok) {
+            setScDraft({ n: "", t: "", g: "" });
+            flash("تم تحديث الهدافين ✅");
+        }
+    };
+    const delScorer = async (n) => { await dbSet("scorers", scorers.filter((s) => s.n !== n)); };
+    const saveTopAnswer = async () => {
+        const cfg = Object.assign(Object.assign({}, config), { topAnswer: topDraft.trim() });
+        const ok = await dbSet("config", cfg);
+        if (ok)
+            flash("تم اعتماد الهداف الرسمي 🏆");
+    };
+    /* أيام البطولة */
+    const days = useMemo(() => [...new Set(ALL.map(dayKey))], []);
+    const todayKey = (() => { const d = new Date(now.getTime() + 3 * 3600 * 1000); return d.toISOString().slice(0, 10); })();
+    const [selDay, setSelDay] = useState(days.includes(todayKey) ? todayKey : days[0]);
+    const dayMatches = useMemo(() => ALL.filter((m) => dayKey(m) === selDay), [selDay]);
+    /* ====== الإطار ====== */
+    const shell = (children) => (React.createElement("div", { dir: "rtl", style: { minHeight: "100vh", background: `radial-gradient(1200px 600px at 50% -100px, #145341 0%, ${PITCH} 45%, ${PITCH_D} 100%)`, color: CHALK, fontFamily: "'Cairo','Segoe UI',sans-serif" } },
+        children,
+        toast && React.createElement("div", { style: { position: "fixed", bottom: 84, left: "50%", transform: "translateX(-50%)", background: GOLD, color: PITCH_D, padding: "10px 20px", borderRadius: 999, fontWeight: 800, fontSize: 14, zIndex: 100, boxShadow: "0 6px 20px rgba(0,0,0,0.4)", whiteSpace: "nowrap" } }, toast)));
+    const crest = (React.createElement("div", { style: { textAlign: "center", paddingTop: 36, paddingBottom: 8 } },
+        React.createElement("div", { style: { fontSize: 44 } }, "\uD83C\uDFC6"),
+        React.createElement("div", { style: { fontWeight: 900, fontSize: 26, color: GOLD, letterSpacing: 0.5 } }, (config && config.eventName) || "فعالية كأس العالم 2026"),
+        React.createElement("div", { style: { color: MUTE, fontSize: 13, marginTop: 4 } }, "104 \u0645\u0628\u0627\u0631\u064A\u0627\u062A \u00B7 \u062A\u0648\u0642\u064A\u062A \u0627\u0644\u0633\u0639\u0648\u062F\u064A\u0629 \uD83C\uDDF8\uD83C\uDDE6 \u00B7 \u062A\u0648\u0642\u0651\u0639 \u0648\u0627\u0643\u0633\u0628 \u0627\u0644\u0646\u0642\u0627\u0637")));
+    if (phase === "loading")
+        return shell(React.createElement("div", { style: { textAlign: "center", paddingTop: 120, fontSize: 18 } }, "\u26BD \u062C\u0627\u0631\u064D \u0627\u0644\u062A\u062D\u0645\u064A\u0644..."));
+    /* تهيئة الإعدادات من المتصفح مباشرة */
+    const [cfgText, setCfgText] = useState("");
+    const [dbUrlText, setDbUrlText] = useState("");
+    const applyCfg = () => {
+        const pick = (k) => { const m = cfgText.match(new RegExp(k + "\\s*[:=]\\s*[\"']([^\"']+)[\"']")); return m ? m[1] : ""; };
+        const cfg = { apiKey: pick("apiKey"), authDomain: pick("authDomain"), databaseURL: pick("databaseURL"),
+            projectId: pick("projectId"), storageBucket: pick("storageBucket"),
+            messagingSenderId: pick("messagingSenderId"), appId: pick("appId") };
+        if (dbUrlText.trim())
+            cfg.databaseURL = dbUrlText.trim();
+        if (!cfg.databaseURL && cfg.projectId)
+            cfg.databaseURL = `https://${cfg.projectId}-default-rtdb.firebaseio.com`;
+        if (!cfg.apiKey || !cfg.databaseURL) {
+            flash("الإعدادات ناقصة — تأكد من لصق الكود كاملًا");
+            return;
+        }
+        try {
+            localStorage.setItem("wc26cfg", JSON.stringify(cfg));
+        }
+        catch (e) { }
+        location.hash = "cfg=" + encodeURIComponent(btoa(JSON.stringify(cfg)));
+        location.reload();
+    };
+    if (phase === "noconfig" || phase === "dberror")
+        return shell(React.createElement(React.Fragment, null,
+            crest,
+            React.createElement("div", { style: { maxWidth: 460, margin: "24px auto", padding: "0 20px", display: "grid", gap: 12 } },
+                React.createElement("div", { style: { background: CARD, border: `1px solid ${LINE}`, borderRadius: 18, padding: 20, lineHeight: 2, fontSize: 14, display: "grid", gap: 10 } },
+                    React.createElement("div", { style: { fontWeight: 900, fontSize: 17 } }, "\u2699\uFE0F \u062A\u0647\u064A\u0626\u0629 \u0627\u0644\u0645\u0648\u0642\u0639 (\u0644\u0644\u0645\u0646\u0638\u0645 \u2014 \u0645\u0631\u0629 \u0648\u0627\u062D\u062F\u0629)"),
+                    phase === "dberror" && React.createElement("div", { style: { color: RED, fontSize: 13 } },
+                        "\u062A\u0639\u0630\u0631 \u0627\u0644\u0627\u062A\u0635\u0627\u0644 \u0628\u0642\u0627\u0639\u062F\u0629 \u0627\u0644\u0628\u064A\u0627\u0646\u0627\u062A. \u062A\u0623\u0643\u062F \u0645\u0646 \u0642\u0648\u0627\u0639\u062F Realtime Database: ",
+                        React.createElement("span", { dir: "ltr", style: { color: GOLD } }, "\".read\": true, \".write\": true"),
+                        " \u062B\u0645 \u0623\u0639\u062F \u0644\u0635\u0642 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A."),
+                    React.createElement("div", { style: { fontSize: 13, color: MUTE } },
+                        "\u0627\u0644\u0635\u0642 \u0647\u0646\u0627 \u0643\u0648\u062F ",
+                        React.createElement("b", { style: { color: CHALK } }, "firebaseConfig"),
+                        " \u0643\u0645\u0627 \u0646\u0633\u062E\u062A\u0647 \u0645\u0646 \u0645\u0648\u0642\u0639 Firebase (\u0627\u0646\u0633\u062E\u0647 \u0643\u0627\u0645\u0644\u064B\u0627 \u0648\u0644\u0627 \u064A\u0647\u0645 \u0634\u0643\u0644\u0647):"),
+                    React.createElement("textarea", { value: cfgText, onChange: (e) => setCfgText(e.target.value), rows: 6, dir: "ltr", placeholder: 'const firebaseConfig = {\n  apiKey: "...",\n  authDomain: "...",\n  ...\n};', style: { background: "rgba(0,0,0,0.25)", border: `1px solid ${LINE}`, color: CHALK, borderRadius: 12, padding: "12px 14px", fontSize: 12, width: "100%", boxSizing: "border-box", fontFamily: "monospace", outline: "none" } }),
+                    React.createElement("div", { style: { fontSize: 12, color: MUTE } }, "\u0627\u062E\u062A\u064A\u0627\u0631\u064A: \u0631\u0627\u0628\u0637 \u0642\u0627\u0639\u062F\u0629 \u0627\u0644\u0628\u064A\u0627\u0646\u0627\u062A (\u064A\u0638\u0647\u0631 \u0623\u0639\u0644\u0649 \u0635\u0641\u062D\u0629 Realtime Database\u060C \u064A\u0646\u062A\u0647\u064A \u0628\u0640 firebaseio.com) \u2014 \u0627\u0644\u0635\u0642\u0647 \u0641\u0642\u0637 \u0625\u0630\u0627 \u0644\u0645 \u064A\u0643\u0646 \u0645\u0648\u062C\u0648\u062F\u064B\u0627 \u0641\u064A \u0627\u0644\u0643\u0648\u062F \u0623\u0639\u0644\u0627\u0647:"),
+                    React.createElement(Input, { value: dbUrlText, onChange: (e) => setDbUrlText(e.target.value), placeholder: "https://xxxx-default-rtdb.firebaseio.com", dir: "ltr", style: { textAlign: "left", fontSize: 12 } }),
+                    React.createElement(Btn, { gold: true, full: true, onClick: applyCfg }, "\u062A\u0641\u0639\u064A\u0644 \u0627\u0644\u0645\u0648\u0642\u0639 \u2705"),
+                    React.createElement("div", { style: { fontSize: 12, color: MUTE, borderTop: `1px dashed ${LINE}`, paddingTop: 10 } },
+                        "\u0645\u0627 \u0639\u0646\u062F\u0643 \u0625\u0639\u062F\u0627\u062F\u0627\u062A\u061F \u0627\u062F\u062E\u0644 ",
+                        React.createElement("span", { dir: "ltr", style: { color: GOLD } }, "console.firebase.google.com"),
+                        " \u2192 \u0623\u0646\u0634\u0626 \u0645\u0634\u0631\u0648\u0639\u064B\u0627 \u2192 Build \u2192 Realtime Database \u2192 Create (Test mode) \u2192 \u0648\u0645\u0646 \u0635\u0641\u062D\u0629 \u0627\u0644\u0645\u0634\u0631\u0648\u0639 \u0627\u0636\u063A\u0637 \u0623\u064A\u0642\u0648\u0646\u0629 ",
+                        React.createElement("span", { dir: "ltr" }, "</>"),
+                        " \u0648\u0627\u0646\u0633\u062E \u0627\u0644\u0643\u0648\u062F.")))));
+    if (phase === "setup")
+        return shell(React.createElement(React.Fragment, null,
+            crest,
+            React.createElement("div", { style: { maxWidth: 420, margin: "24px auto", padding: "0 20px", display: "grid", gap: 12 } },
+                React.createElement("div", { style: { background: CARD, border: `1px solid ${LINE}`, borderRadius: 18, padding: 20, display: "grid", gap: 12 } },
+                    React.createElement("div", { style: { fontWeight: 800, fontSize: 17 } }, "\uD83D\uDC4B \u0623\u0646\u062A \u0623\u0648\u0644 \u0645\u0646 \u064A\u0641\u062A\u062D \u0627\u0644\u0641\u0639\u0627\u0644\u064A\u0629 \u2014 \u0623\u0646\u062A \u0627\u0644\u0645\u0646\u0638\u0645!"),
+                    React.createElement("div", { style: { color: MUTE, fontSize: 13 } }, "\u0627\u062E\u062A\u0631 \u0627\u0633\u0645 \u0627\u0644\u0641\u0639\u0627\u0644\u064A\u0629 \u0648\u0631\u0645\u0632 \u0627\u0644\u0625\u062F\u0627\u0631\u0629 (\u062A\u062D\u062A\u0627\u062C\u0647 \u0644\u0631\u0635\u062F \u0627\u0644\u0646\u062A\u0627\u0626\u062C \u0648\u062A\u062D\u062F\u064A\u062B \u0627\u0644\u0647\u062F\u0627\u0641\u064A\u0646 \u064A\u0648\u0645\u064A\u064B\u0627)."),
+                    React.createElement(Input, { value: setupName, onChange: (e) => setSetupName(e.target.value), placeholder: "\u0627\u0633\u0645 \u0627\u0644\u0641\u0639\u0627\u0644\u064A\u0629" }),
+                    React.createElement(Input, { value: setupPin, onChange: (e) => setSetupPin(e.target.value.replace(/[^0-9]/g, "")), placeholder: "\u0631\u0645\u0632 \u0627\u0644\u0625\u062F\u0627\u0631\u0629 (\u0664 \u0623\u0631\u0642\u0627\u0645 \u0623\u0648 \u0623\u0643\u062B\u0631)", inputMode: "numeric", center: true }),
+                    React.createElement(Btn, { gold: true, full: true, onClick: doSetup }, "\u0625\u0646\u0634\u0627\u0621 \u0627\u0644\u0641\u0639\u0627\u0644\u064A\u0629 \uD83D\uDE80")))));
+    if (phase === "login")
+        return shell(React.createElement(React.Fragment, null,
+            crest,
+            React.createElement("div", { style: { maxWidth: 420, margin: "16px auto", padding: "0 20px", display: "grid", gap: 12 } },
+                React.createElement("div", { style: { display: "flex", gap: 8 } }, [["register", "مشارك جديد"], ["login", "تسجيل الدخول"]].map(([k, l]) => (React.createElement("button", { key: k, onClick: () => setMode(k), style: { flex: 1, padding: "10px 0", borderRadius: 12, fontFamily: "inherit", fontWeight: 800, fontSize: 14, cursor: "pointer", background: mode === k ? GOLD : "transparent", color: mode === k ? PITCH_D : CHALK, border: `1px solid ${mode === k ? GOLD : LINE}` } }, l)))),
+                React.createElement("div", { style: { background: CARD, border: `1px solid ${LINE}`, borderRadius: 18, padding: 20, display: "grid", gap: 12 } },
+                    React.createElement(Input, { value: loginName, onChange: (e) => setLoginName(e.target.value), placeholder: "\u0627\u0633\u0645\u0643 \u0641\u064A \u0627\u0644\u0642\u0631\u0648\u0628" }),
+                    React.createElement(Input, { value: loginPin, onChange: (e) => setLoginPin(e.target.value.replace(/[^0-9]/g, "")), placeholder: "\u0631\u0645\u0632\u0643 \u0627\u0644\u0633\u0631\u064A (\u0664 \u0623\u0631\u0642\u0627\u0645)", inputMode: "numeric", center: true }),
+                    mode === "register" && React.createElement(Input, { value: scorerPick, onChange: (e) => setScorerPick(e.target.value), placeholder: "\u062A\u0648\u0642\u0639\u0643 \u0644\u0647\u062F\u0627\u0641 \u0627\u0644\u0628\u0637\u0648\u0644\u0629 \uD83D\uDC5F (+10 \u0646\u0642\u0627\u0637)" }),
+                    React.createElement(Btn, { gold: true, full: true, onClick: enter }, mode === "register" ? "سجلني في الفعالية ⚽" : "دخول"),
+                    React.createElement("div", { style: { color: MUTE, fontSize: 12, textAlign: "center" } },
+                        "\u0627\u0644\u0645\u0633\u062C\u0644\u0648\u0646 \u062D\u062A\u0649 \u0627\u0644\u0622\u0646: ",
+                        users.length,
+                        " \u0645\u0634\u0627\u0631\u0643")),
+                React.createElement("div", { style: { background: "rgba(232,195,90,0.08)", border: `1px dashed ${GOLD}`, borderRadius: 14, padding: 14, fontSize: 13, lineHeight: 1.9 } },
+                    React.createElement("b", { style: { color: GOLD } }, "\u0646\u0638\u0627\u0645 \u0627\u0644\u0646\u0642\u0627\u0637:"),
+                    " \u0627\u0644\u0646\u062A\u064A\u062C\u0629 \u0628\u0627\u0644\u0636\u0628\u0637 = ",
+                    React.createElement("b", null, "3"),
+                    " \u0646\u0642\u0627\u0637 \u00B7 \u0627\u062A\u062C\u0627\u0647 \u0627\u0644\u0646\u062A\u064A\u062C\u0629 (\u0641\u0648\u0632/\u062A\u0639\u0627\u062F\u0644/\u062E\u0633\u0627\u0631\u0629) = ",
+                    React.createElement("b", null, "1"),
+                    " \u0646\u0642\u0637\u0629 \u00B7 \u062A\u0648\u0642\u0639 \u0627\u0644\u0647\u062F\u0627\u0641 \u0627\u0644\u0635\u062D\u064A\u062D = ",
+                    React.createElement("b", null, "10"),
+                    " \u0646\u0642\u0627\u0637 \uD83C\uDFC6"))));
+    /* بطاقة مباراة */
+    const matchCard = (m) => {
+        const id = m[0], locked = isLocked(m), res = results[mid(m)];
+        const pred = myPreds[mid(m)] || "";
+        const [ph, pa] = pred ? pred.split("-") : ["", ""];
+        const pts = res ? calcPts(pred && /^\d+-\d+$/.test(pred) ? pred : null, res) : null;
+        const h = teamName(m, "h"), a = teamName(m, "a");
+        const stageLabel = id <= 72 ? `المجموعة ${m[2]}` : m[2];
+        return (React.createElement("div", { style: { background: CARD, border: `1px solid ${res ? "rgba(232,195,90,0.4)" : LINE}`, borderRadius: 16, padding: "14px 14px 12px" } },
+            React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 11.5, color: MUTE, marginBottom: 10 } },
+                React.createElement("span", null,
+                    "\u0645\u0628\u0627\u0631\u0627\u0629 ",
+                    id,
+                    " \u00B7 ",
+                    stageLabel),
+                React.createElement("span", null, res ? "✅ انتهت" : locked ? "🔒 جارية / مقفلة" : `🕐 ${fmtTime(m)}`)),
+            React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", gap: 8 } },
+                React.createElement("div", { style: { textAlign: "center" } },
+                    React.createElement("div", { style: { fontSize: 30 } }, flag(h)),
+                    React.createElement("div", { style: { fontWeight: 800, fontSize: 13.5, marginTop: 2 } }, h)),
+                React.createElement("div", { style: { textAlign: "center", minWidth: 92 } }, res ? React.createElement("div", { style: { fontWeight: 900, fontSize: 26, color: GOLD, direction: "ltr" } },
+                    res.split("-")[0],
+                    " : ",
+                    res.split("-")[1])
+                    : React.createElement("div", { style: { fontWeight: 900, fontSize: 16, color: MUTE } }, "VS")),
+                React.createElement("div", { style: { textAlign: "center" } },
+                    React.createElement("div", { style: { fontSize: 30 } }, flag(a)),
+                    React.createElement("div", { style: { fontWeight: 800, fontSize: 13.5, marginTop: 2 } }, a))),
+            React.createElement("div", { style: { borderTop: `1px dashed ${LINE}`, marginTop: 12, paddingTop: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 } },
+                React.createElement("span", { style: { fontSize: 12, color: MUTE } }, "\u062A\u0648\u0642\u0639\u0643:"),
+                React.createElement(ScoreBox, { value: ph, disabled: locked, onChange: (v) => setPred(id, "h", v) }),
+                React.createElement("span", { style: { color: MUTE, fontWeight: 900 } }, "-"),
+                React.createElement(ScoreBox, { value: pa, disabled: locked, onChange: (v) => setPred(id, "a", v) }),
+                pts !== null && (React.createElement("span", { style: { marginRight: 6, background: pts === 3 ? GOLD : pts === 1 ? "rgba(243,239,228,0.18)" : "rgba(226,109,92,0.2)", color: pts === 3 ? PITCH_D : pts === 1 ? CHALK : RED, borderRadius: 999, padding: "3px 12px", fontWeight: 900, fontSize: 13 } }, pts === 3 ? "🎯 +3" : pts === 1 ? "+1" : "0")),
+                locked && !res && pred && React.createElement("span", { style: { fontSize: 11.5, color: MUTE } },
+                    "\u062A\u0648\u0642\u0639\u0643: ",
+                    pred))));
+    };
+    const matchesTab = () => (React.createElement("div", null,
+        React.createElement("div", { style: { display: "flex", gap: 8, overflowX: "auto", padding: "4px 2px 12px" } }, days.map((d) => {
+            const sel = d === selDay, isToday = d === todayKey;
+            return (React.createElement("button", { key: d, onClick: () => setSelDay(d), style: { flexShrink: 0, padding: "8px 14px", borderRadius: 999, fontFamily: "inherit", fontWeight: 800, fontSize: 12.5, cursor: "pointer", background: sel ? GOLD : "rgba(0,0,0,0.2)", color: sel ? PITCH_D : CHALK, border: `1px solid ${sel ? GOLD : isToday ? GOLD : LINE}` } },
+                isToday ? "📅 اليوم · " : "",
+                fmtDay(d)));
+        })),
+        React.createElement("div", { style: { display: "grid", gap: 10 } }, dayMatches.map((m) => React.createElement(React.Fragment, { key: m[0] }, matchCard(m))))));
+    const boardTab = () => (React.createElement("div", { style: { display: "grid", gap: 10 } },
+        React.createElement("div", { style: { fontWeight: 900, fontSize: 18 } },
+            "\uD83C\uDFC5 \u062A\u0631\u062A\u064A\u0628 \u0627\u0644\u0645\u0634\u0627\u0631\u0643\u064A\u0646 (",
+            users.length,
+            ") ",
+            React.createElement("span", { style: { fontSize: 11, color: MUTE, fontWeight: 600 } }, "\u00B7 \u064A\u062A\u062D\u062F\u062B \u0645\u0628\u0627\u0634\u0631\u0629")),
+        board.length === 0 ? (React.createElement("div", { style: { textAlign: "center", color: MUTE, padding: 30 } }, "\u0644\u0627 \u064A\u0648\u062C\u062F \u0645\u0634\u0627\u0631\u0643\u0648\u0646 \u0628\u0639\u062F \u2014 \u0634\u0627\u0631\u0643 \u0627\u0644\u0631\u0627\u0628\u0637 \u0641\u064A \u0627\u0644\u0642\u0631\u0648\u0628!")) : board.map((r, i) => (React.createElement("div", { key: r.name, style: { background: r.name === me.name ? "rgba(232,195,90,0.12)" : CARD, border: `1px solid ${r.name === me.name ? GOLD : LINE}`, borderRadius: 14, padding: "12px 14px", display: "flex", alignItems: "center", gap: 12 } },
+            React.createElement("div", { style: { fontSize: i < 3 ? 24 : 15, fontWeight: 900, width: 34, textAlign: "center", color: MUTE } }, i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1),
+            React.createElement("div", { style: { flex: 1 } },
+                React.createElement("div", { style: { fontWeight: 800, fontSize: 15 } },
+                    r.name,
+                    " ",
+                    r.name === me.name && React.createElement("span", { style: { fontSize: 11, color: GOLD } }, "(\u0623\u0646\u062A)")),
+                React.createElement("div", { style: { fontSize: 11.5, color: MUTE } },
+                    "\uD83C\uDFAF ",
+                    r.exact,
+                    " \u0646\u062A\u064A\u062C\u0629 \u062F\u0642\u064A\u0642\u0629 \u00B7 \u2714\uFE0F ",
+                    r.hit,
+                    " \u0627\u062A\u062C\u0627\u0647 \u0635\u062D\u064A\u062D",
+                    r.bonus ? " · 👟 +10 هداف" : "",
+                    r.scorer ? ` · هدافه: ${r.scorer}` : "")),
+            React.createElement("div", { style: { fontWeight: 900, fontSize: 22, color: GOLD } }, r.pts))))));
+    const scorersTab = () => (React.createElement("div", { style: { display: "grid", gap: 10 } },
+        React.createElement("div", { style: { fontWeight: 900, fontSize: 18 } }, "\uD83D\uDC5F \u0647\u062F\u0627\u0641\u0648 \u0627\u0644\u0628\u0637\u0648\u0644\u0629"),
+        config && config.topAnswer && (React.createElement("div", { style: { background: "rgba(232,195,90,0.12)", border: `1px solid ${GOLD}`, borderRadius: 14, padding: 12, fontWeight: 800 } },
+            "\uD83C\uDFC6 \u0627\u0644\u0647\u062F\u0627\u0641 \u0627\u0644\u0631\u0633\u0645\u064A \u0627\u0644\u0645\u0639\u062A\u0645\u062F: ",
+            React.createElement("span", { style: { color: GOLD } }, config.topAnswer))),
+        scorers.length === 0 ? (React.createElement("div", { style: { textAlign: "center", color: MUTE, padding: 30 } }, "\u0633\u064A\u062D\u062F\u0651\u062B \u0627\u0644\u0645\u0646\u0638\u0645 \u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u0647\u062F\u0627\u0641\u064A\u0646 \u064A\u0648\u0645\u064A\u064B\u0627 \u0645\u0639 \u062A\u0642\u062F\u0645 \u0627\u0644\u0628\u0637\u0648\u0644\u0629 \u26BD")) : scorers.map((s, i) => (React.createElement("div", { key: s.n, style: { background: CARD, border: `1px solid ${LINE}`, borderRadius: 14, padding: "12px 14px", display: "flex", alignItems: "center", gap: 12 } },
+            React.createElement("div", { style: { width: 28, textAlign: "center", fontWeight: 900, color: MUTE } }, i + 1),
+            React.createElement("div", { style: { fontSize: 24 } }, flag(s.t)),
+            React.createElement("div", { style: { flex: 1, fontWeight: 800 } },
+                s.n,
+                " ",
+                React.createElement("span", { style: { fontSize: 12, color: MUTE } },
+                    "(",
+                    s.t,
+                    ")")),
+            React.createElement("div", { style: { fontWeight: 900, fontSize: 18, color: GOLD } },
+                s.g,
+                " \u26BD")))),
+        React.createElement("div", { style: { background: CARD, border: `1px dashed ${LINE}`, borderRadius: 14, padding: 12, fontSize: 13, color: MUTE } },
+            "\u062A\u0648\u0642\u0639\u0643 \u0644\u0644\u0647\u062F\u0627\u0641: ",
+            React.createElement("b", { style: { color: CHALK } }, me.scorer || "لم تختر"),
+            " \u2014 \u0625\u0630\u0627 \u0635\u062D \u062A\u0648\u0642\u0639\u0643 \u062A\u062D\u0635\u0644 \u0639\u0644\u0649 ",
+            React.createElement("b", { style: { color: GOLD } }, "+10 \u0646\u0642\u0627\u0637"),
+            " \u0641\u064A \u0646\u0647\u0627\u064A\u0629 \u0627\u0644\u0628\u0637\u0648\u0644\u0629.")));
+    const adminTab = () => {
+        if (!isAdmin)
+            return (React.createElement("div", { style: { maxWidth: 360, margin: "20px auto", display: "grid", gap: 10 } },
+                React.createElement("div", { style: { fontWeight: 900, fontSize: 17, textAlign: "center" } }, "\uD83D\uDD10 \u0644\u0648\u062D\u0629 \u0627\u0644\u0645\u0646\u0638\u0645"),
+                React.createElement(Input, { value: adminPinTry, onChange: (e) => setAdminPinTry(e.target.value), placeholder: "\u0631\u0645\u0632 \u0627\u0644\u0625\u062F\u0627\u0631\u0629", inputMode: "numeric", center: true }),
+                React.createElement(Btn, { gold: true, full: true, onClick: () => { if (adminPinTry === config.adminPin) {
+                        setIsAdmin(true);
+                        flash("أهلًا بالمنظم 👑");
+                    }
+                    else
+                        flash("الرمز غير صحيح"); } }, "\u062F\u062E\u0648\u0644")));
+        const started = ALL.filter((m) => isLocked(m));
+        const pending = started.filter((m) => !results[mid(m)]);
+        const done = started.filter((m) => results[mid(m)]).reverse();
+        const resRow = (m) => {
+            const id = m[0], d = resDraft[id] || { h: "", a: "" };
+            return (React.createElement("div", { style: { background: CARD, border: `1px solid ${LINE}`, borderRadius: 12, padding: 10, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" } },
+                React.createElement("div", { style: { flex: 1, fontSize: 13, fontWeight: 700, minWidth: 150 } },
+                    flag(teamName(m, "h")),
+                    " ",
+                    teamName(m, "h"),
+                    " \u00D7 ",
+                    teamName(m, "a"),
+                    " ",
+                    flag(teamName(m, "a")),
+                    React.createElement("div", { style: { fontSize: 11, color: MUTE } },
+                        "\u0645\u0628\u0627\u0631\u0627\u0629 ",
+                        id,
+                        " \u00B7 ",
+                        fmtDay(dayKey(m)),
+                        results[mid(m)] ? ` · النتيجة الحالية ${results[mid(m)]}` : "")),
+                React.createElement(ScoreBox, { value: d.h, onChange: (v) => setResDraft((p) => (Object.assign(Object.assign({}, p), { [id]: Object.assign(Object.assign({}, d), { h: v }) }))) }),
+                React.createElement("span", { style: { fontWeight: 900, color: MUTE } }, "-"),
+                React.createElement(ScoreBox, { value: d.a, onChange: (v) => setResDraft((p) => (Object.assign(Object.assign({}, p), { [id]: Object.assign(Object.assign({}, d), { a: v }) }))) }),
+                React.createElement(Btn, { small: true, gold: true, onClick: () => saveResult(id) }, "\u0631\u0635\u062F"),
+                results[mid(m)] && React.createElement(Btn, { small: true, danger: true, onClick: () => clearResult(id) }, "\u062D\u0630\u0641")));
+        };
+        return (React.createElement("div", { style: { display: "grid", gap: 18 } },
+            React.createElement("div", { style: { background: "rgba(232,195,90,0.1)", border: `1px solid ${GOLD}`, borderRadius: 14, padding: 12, display: "grid", gap: 8 } },
+                React.createElement("div", { style: { fontWeight: 900, fontSize: 14 } }, "\uD83D\uDD17 \u0631\u0627\u0628\u0637 \u0627\u0644\u0641\u0639\u0627\u0644\u064A\u0629 \u2014 \u0623\u0631\u0633\u0644 \u0647\u0630\u0627 \u0628\u0627\u0644\u0636\u0628\u0637 \u0641\u064A \u0627\u0644\u0642\u0631\u0648\u0628:"),
+                React.createElement("div", { dir: "ltr", style: { fontSize: 11, wordBreak: "break-all", background: "rgba(0,0,0,0.25)", borderRadius: 10, padding: 8, color: CHALK } }, shareLink()),
+                React.createElement(Btn, { small: true, gold: true, onClick: () => { try {
+                        navigator.clipboard.writeText(shareLink());
+                        flash("تم نسخ الرابط 📋");
+                    }
+                    catch (e) {
+                        flash("انسخه يدويًا من الأعلى");
+                    } } }, "\u0646\u0633\u062E \u0627\u0644\u0631\u0627\u0628\u0637 \uD83D\uDCCB")),
+            React.createElement("div", null,
+                React.createElement("div", { style: { fontWeight: 900, fontSize: 16, marginBottom: 8 } },
+                    "\uD83D\uDCCB \u0631\u0635\u062F \u0627\u0644\u0646\u062A\u0627\u0626\u062C \u2014 \u0645\u0628\u0627\u0631\u064A\u0627\u062A \u0628\u0627\u0646\u062A\u0638\u0627\u0631 \u0627\u0644\u0646\u062A\u064A\u062C\u0629 (",
+                    pending.length,
+                    ")"),
+                React.createElement("div", { style: { display: "grid", gap: 8 } }, pending.length === 0 ? React.createElement("div", { style: { color: MUTE, fontSize: 13 } }, "\u0644\u0627 \u062A\u0648\u062C\u062F \u0645\u0628\u0627\u0631\u064A\u0627\u062A \u0645\u0646\u062A\u0647\u064A\u0629 \u0628\u062F\u0648\u0646 \u0646\u062A\u064A\u062C\u0629 \uD83D\uDC4C") : pending.map((m) => React.createElement(React.Fragment, { key: m[0] }, resRow(m))))),
+            done.length > 0 && (React.createElement("div", null,
+                React.createElement("div", { style: { fontWeight: 900, fontSize: 16, marginBottom: 8 } }, "\u2705 \u0646\u062A\u0627\u0626\u062C \u0645\u0631\u0635\u0648\u062F\u0629 (\u0622\u062E\u0631 10) \u2014 \u064A\u0645\u0643\u0646 \u062A\u0639\u062F\u064A\u0644\u0647\u0627"),
+                React.createElement("div", { style: { display: "grid", gap: 8 } }, done.slice(0, 10).map((m) => React.createElement(React.Fragment, { key: m[0] }, resRow(m)))))),
+            React.createElement("div", null,
+                React.createElement("div", { style: { fontWeight: 900, fontSize: 16, marginBottom: 8 } }, "\uD83D\uDC5F \u062A\u062D\u062F\u064A\u062B \u0627\u0644\u0647\u062F\u0627\u0641\u064A\u0646 (\u064A\u0648\u0645\u064A\u064B\u0627)"),
+                React.createElement("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 } },
+                    React.createElement(Input, { value: scDraft.n, onChange: (e) => setScDraft(Object.assign(Object.assign({}, scDraft), { n: e.target.value })), placeholder: "\u0627\u0633\u0645 \u0627\u0644\u0644\u0627\u0639\u0628", style: { flex: 2, minWidth: 120 } }),
+                    React.createElement(Input, { value: scDraft.t, onChange: (e) => setScDraft(Object.assign(Object.assign({}, scDraft), { t: e.target.value })), placeholder: "\u0627\u0644\u0645\u0646\u062A\u062E\u0628", style: { flex: 1, minWidth: 90 } }),
+                    React.createElement(Input, { value: scDraft.g, onChange: (e) => setScDraft(Object.assign(Object.assign({}, scDraft), { g: e.target.value.replace(/[^0-9]/g, "") })), placeholder: "\u0623\u0647\u062F\u0627\u0641", inputMode: "numeric", center: true, style: { width: 70, flex: "0 0 70px" } }),
+                    React.createElement(Btn, { small: true, gold: true, onClick: addScorer }, "\u062D\u0641\u0638")),
+                scorers.map((s) => (React.createElement("div", { key: s.n, style: { display: "flex", justifyContent: "space-between", padding: "6px 4px", fontSize: 13, borderBottom: `1px dashed ${LINE}` } },
+                    React.createElement("span", null,
+                        flag(s.t),
+                        " ",
+                        s.n,
+                        " \u2014 ",
+                        s.g,
+                        " \u26BD"),
+                    React.createElement("button", { onClick: () => delScorer(s.n), style: { background: "none", border: "none", color: RED, cursor: "pointer", fontFamily: "inherit" } }, "\u062D\u0630\u0641")))),
+                React.createElement("div", { style: { display: "flex", gap: 8, marginTop: 10 } },
+                    React.createElement(Input, { value: topDraft, onChange: (e) => setTopDraft(e.target.value), placeholder: "\u0627\u0644\u0647\u062F\u0627\u0641 \u0627\u0644\u0631\u0633\u0645\u064A \u0628\u0646\u0647\u0627\u064A\u0629 \u0627\u0644\u0628\u0637\u0648\u0644\u0629 (\u0644\u0627\u062D\u062A\u0633\u0627\u0628 +10)" }),
+                    React.createElement(Btn, { small: true, gold: true, onClick: saveTopAnswer }, "\u0627\u0639\u062A\u0645\u0627\u062F"))),
+            React.createElement("div", null,
+                React.createElement("div", { style: { fontWeight: 900, fontSize: 16, marginBottom: 8 } }, "\uD83D\uDDC2\uFE0F \u062A\u062D\u062F\u064A\u062F \u0641\u0631\u0642 \u0627\u0644\u0623\u062F\u0648\u0627\u0631 \u0627\u0644\u0625\u0642\u0635\u0627\u0626\u064A\u0629 (\u0639\u0646\u062F \u062A\u0623\u0647\u0644\u0647\u0627)"),
+                React.createElement("div", { style: { display: "grid", gap: 8 } }, KO.map((m) => {
+                    const id = m[0], d = koDraft[id] || {};
+                    const cur = koTeams["m" + id] || {};
+                    return (React.createElement("div", { key: id, style: { background: CARD, border: `1px solid ${LINE}`, borderRadius: 12, padding: 10 } },
+                        React.createElement("div", { style: { fontSize: 11.5, color: MUTE, marginBottom: 6 } },
+                            "\u0645\u0628\u0627\u0631\u0627\u0629 ",
+                            id,
+                            " \u00B7 ",
+                            m[2],
+                            " \u00B7 ",
+                            fmtDay(dayKey(m)),
+                            " ",
+                            fmtTime(m)),
+                        React.createElement("div", { style: { display: "flex", gap: 8, flexWrap: "wrap" } },
+                            React.createElement(Input, { value: d.h !== undefined ? d.h : (cur.h || ""), onChange: (e) => setKoDraft((p) => (Object.assign(Object.assign({}, p), { [id]: Object.assign(Object.assign({}, d), { h: e.target.value }) }))), placeholder: m[3], style: { flex: 1, minWidth: 110, fontSize: 13, padding: "8px 10px" } }),
+                            React.createElement(Input, { value: d.a !== undefined ? d.a : (cur.a || ""), onChange: (e) => setKoDraft((p) => (Object.assign(Object.assign({}, p), { [id]: Object.assign(Object.assign({}, d), { a: e.target.value }) }))), placeholder: m[4], style: { flex: 1, minWidth: 110, fontSize: 13, padding: "8px 10px" } }),
+                            React.createElement(Btn, { small: true, onClick: () => saveKoTeam(id) }, "\u062D\u0641\u0638"))));
+                })))));
+    };
+    const TABS = [["matches", "⚽", "المباريات"], ["board", "🏅", "الترتيب"], ["scorers", "👟", "الهدافون"], ["admin", "🛠️", "الإدارة"]];
+    return shell(React.createElement(React.Fragment, null,
+        React.createElement("div", { style: { maxWidth: 560, margin: "0 auto", padding: "0 14px 110px" } },
+            React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 2px 12px" } },
+                React.createElement("div", null,
+                    React.createElement("div", { style: { fontWeight: 900, fontSize: 19, color: GOLD } },
+                        "\uD83C\uDFC6 ",
+                        config && config.eventName),
+                    React.createElement("div", { style: { fontSize: 12, color: MUTE } },
+                        "\u0623\u0647\u0644\u064B\u0627 ",
+                        me.name,
+                        " \u00B7 ",
+                        users.length,
+                        " \u0645\u0634\u0627\u0631\u0643 \u00B7 \u062A\u0648\u0642\u064A\u062A \u0627\u0644\u0633\u0639\u0648\u062F\u064A\u0629")),
+                React.createElement("button", { onClick: () => { setPhase("login"); setMe(null); setIsAdmin(false); setLoginPin(""); try {
+                        localStorage.removeItem("wc26me");
+                    }
+                    catch (e) { } }, style: { background: "none", border: `1px solid ${LINE}`, color: MUTE, borderRadius: 10, padding: "6px 12px", fontSize: 12, fontFamily: "inherit", cursor: "pointer" } }, "\u062E\u0631\u0648\u062C")),
+            tab === "matches" && matchesTab(),
+            tab === "board" && boardTab(),
+            tab === "scorers" && scorersTab(),
+            tab === "admin" && adminTab()),
+        dirty && tab === "matches" && (React.createElement("div", { style: { position: "fixed", bottom: 78, left: 0, right: 0, display: "flex", justifyContent: "center", zIndex: 60 } },
+            React.createElement("button", { onClick: savePreds, style: { background: GOLD, color: PITCH_D, border: "none", borderRadius: 999, padding: "13px 34px", fontWeight: 900, fontSize: 15, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 8px 24px rgba(0,0,0,0.45)" } }, "\uD83D\uDCBE \u062D\u0641\u0638 \u0627\u0644\u062A\u0648\u0642\u0639\u0627\u062A"))),
+        React.createElement("div", { style: { position: "fixed", bottom: 0, left: 0, right: 0, background: PITCH_D, borderTop: `1px solid ${LINE}`, display: "flex", justifyContent: "space-around", padding: "8px 0 14px", zIndex: 50 } }, TABS.map(([k, ic, l]) => (React.createElement("button", { key: k, onClick: () => setTab(k), style: { background: "none", border: "none", fontFamily: "inherit", cursor: "pointer", color: tab === k ? GOLD : MUTE, fontWeight: 800, fontSize: 11.5, display: "grid", justifyItems: "center", gap: 2 } },
+            React.createElement("span", { style: { fontSize: 20 } }, ic),
+            l))))));
+}
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App, null));
+
+</script>
+</body>
+</html>
